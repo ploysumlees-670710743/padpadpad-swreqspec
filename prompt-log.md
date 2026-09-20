@@ -4,10 +4,10 @@
 
 ---
 
-## 2569-09-19 คำสั่ง: /clarify specs/001-selection/spec.md
+## 2569-09-19 คำสั่ง: /clarify specs/006-selection/spec.md
 
 - เครื่องมือ: Copilot ใน Codespaces
-- ไฟล์: specs/001-selection/spec.md (v1)
+- ไฟล์: specs/006-selection/spec.md (v1)
 
 ### คำถามที่ AI ถาม (ทั้งหมด)
 
@@ -42,10 +42,10 @@
 
 ---
 
-## 2569-09-20 คำสั่ง: /clarify specs/002-checklist/spec.md
+## 2569-09-20 คำสั่ง: /clarify specs/005-checklist/spec.md
 
 - เครื่องมือ: Copilot ใน Codespaces
-- ไฟล์: specs/002-checklist/spec.md (v1)
+- ไฟล์: specs/005-checklist/spec.md (v1)
 
 ### คำถามที่ AI ถาม (ทั้งหมด)
 
@@ -77,10 +77,10 @@
 
 ---
 
-## 2569-09-20 คำสั่ง: /plan specs/002-checklist/spec.md
+## 2569-09-20 คำสั่ง: /plan specs/005-checklist/spec.md
 
 - เครื่องมือ: Copilot ใน Codespaces
-- ผลลัพธ์: specs/002-checklist/plan.md
+- ผลลัพธ์: specs/005-checklist/plan.md
 - Constraint ที่ AI ยังไม่ได้ใช้: ไม่มี ทุก CON และ NFR ใน spec ถูกนำไปใช้ใน plan
 - AC ที่อยู่ในแผนทดสอบ: AC-SCH-01, AC-SCH-02
 - สิ่งที่ AI บอกว่าอยากเดาแต่ไม่ได้เดา: ไม่มี Open Questions ค้างอยู่ใน spec v2; ส่วนข้อมูลโครงการ/สถานที่และการแจ้งเตือนเรียลไทม์ถูกคงไว้นอกขอบเขตตาม spec

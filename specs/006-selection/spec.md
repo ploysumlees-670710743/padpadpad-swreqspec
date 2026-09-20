@@ -1,5 +1,5 @@
 # Feature: คัดเลือกตามลำดับโควต้า 150 คน (Selection)
-Spec ID: SPEC-SEL-001 | Source: SRS v0.3 | Use case: UC-06 Owner: คณะกรรมการ | Status: Draft v2 | Updated: 2569-09-19
+Spec ID: SPEC-SEL-006 | Source: SRS v0.3 | Use case: UC-06 Owner: คณะกรรมการ | Status: Draft v2 | Updated: 2569-09-19
 ## Goal
 คณะกรรมการคัดเลือกผู้สมัครที่กรอกข้อมูลถูกต้องตามลำดับเวลาที่สมัคร โดยจำนวนผู้ได้รับสิทธิ์รวมไม่เกิน 150 คน และระบบบันทึกรายชื่อผู้ผ่านการคัดเลือกและผู้ไม่ผ่านการคัดเลือก
 

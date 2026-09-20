@@ -1,5 +1,5 @@
 # Feature: จัดการตารางกิจกรรมและ checklist (Schedule Management)
-Spec ID: SPEC-SCH-001 | Source: SRS v0.3 | Use case: UC-05 Owner: คณะกรรมการ | Status: Draft v2 | Updated: 2569-09-20
+Spec ID: SPEC-SCH-005 | Source: SRS v0.3 | Use case: UC-05 Owner: คณะกรรมการ | Status: Draft v2 | Updated: 2569-09-20
 ## Goal
 คณะกรรมการสร้างและปรับแต่งตารางกิจกรรมประจำวันภายในค่าย เพื่อจัดทำกำหนดการกิจกรรมที่ชัดเจนสำหรับนักศึกษาและอาจารย์
 
