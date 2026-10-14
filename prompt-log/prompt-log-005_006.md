@@ -84,3 +84,49 @@
 - Constraint ที่ AI ยังไม่ได้ใช้: ไม่มี ทุก CON และ NFR ใน spec ถูกนำไปใช้ใน plan
 - AC ที่อยู่ในแผนทดสอบ: AC-SCH-01, AC-SCH-02
 - สิ่งที่ AI บอกว่าอยากเดาแต่ไม่ได้เดา: ไม่มี Open Questions ค้างอยู่ใน spec v2; ส่วนข้อมูลโครงการ/สถานที่และการแจ้งเตือนเรียลไทม์ถูกคงไว้นอกขอบเขตตาม spec
+
+---
+
+## 2569-10-14 คำสั่ง: /tasks specs/005-checklist/spec.md
+
+- เครื่องมือ: Copilot ใน Codespaces
+- ผลลัพธ์: specs/005-checklist/tasks.md
+- สรุปสั้น: สร้าง task list สำหรับ feature นี้เรียบร้อยแล้ว มี 3 เฟส, 6 task, 0 task ที่รอ Q-xx และเฟสแรกที่ลองใช้งานได้จริงคือ เฟส 1 (เพิ่มและติดตาม checklist สำเร็จ)
+- เฟสที่แบ่ง: เฟส 0 ฐานราก, เฟส 1 เพิ่มและติดตาม checklist สำเร็จ (AC-SCH-01), เฟส 2 ปฏิเสธกิจกรรมที่ซ้อนทับและแสดงข้อผิดพลาด (AC-SCH-02)
+- ข้อควรระวัง: ไม่มี Open Questions ใน spec v2 จึงไม่มี task ที่ติดรอคำตอบตามคำสั่ง /tasks
+
+---
+
+## 2569-10-14 คำสั่ง: /implement T-01 specs/005-checklist/tasks.md
+
+- เครื่องมือ: Copilot ใน Codespaces
+- ไฟล์ที่แก้/สร้าง: backend/app/models/camp_project.py, backend/app/models/camp_location.py, backend/app/models/sub_activity.py, backend/app/models/user_permission.py, backend/app/models/__init__.py, backend/db/schema.sql, backend/tests/test_schedule_task_t01.py
+- ผลลัพธ์: ทำ task T-01 ให้เสร็จตามเงื่อนไข "เสร็จเมื่อ" โดยสร้าง model พื้นฐานสำหรับโครงการ/สถานที่/กิจกรรม/สิทธิ์ และ schema SQL สำหรับฐานข้อมูล
+- ผลทดสอบ: `python -m pytest backend/tests/test_schedule_task_t01.py -q` → `1 passed in 0.02s`
+- สิ่งที่เกือบต้องเดาแต่ถามแทน: ไม่มี เพราะ spec และ plan ระบุชัดเจนว่า task นี้เป็นงานฐานรากและไม่อยู่ใน Open Question
+
+---
+
+## 2569-10-14 คำสั่ง: /testcases AC-SCH-01 specs/005-checklist/
+
+- เครื่องมือ: Copilot ใน Codespaces
+- โหมด: เขียน test (มีแถวสถานะ "ใช้ได้" ใน test-cases.md แล้ว)
+- ไฟล์ที่สร้าง/แก้: specs/005-checklist/test-cases.md (อ่านเฉพาะ/ไม่ได้แก้สถานะ), backend/tests/test_AC_SCH_01.py, frontend/src/__tests__/TC-SCH-01-1.test.jsx, frontend/src/__tests__/TC-SCH-01-2.test.jsx, frontend/src/__tests__/TC-SCH-01-3.test.jsx
+- ผลลัพธ์: เขียน test ตาม 3 แถวที่มีสถานะ "ใช้ได้" สำหรับ AC-SCH-01
+- ผลทดสอบ: `python -m pytest backend/tests/test_AC_SCH_01.py -q` → `3 passed in 0.02s`
+- ข้อสังเกต: โครงสร้าง React/Vitest ไม่มีอยู่ใน repo จึงไม่มี frontend package config ให้รันจริง แต่ได้วางไฟล์ทดสอบ UI ในตำแหน่งที่คาดหวังไว้แล้วเพื่อพร้อมสำหรับการทำงานในรอบต่อไป
+
+---
+
+## 2569-10-14 คำสั่ง: /verify specs/005-checklist/
+
+- เครื่องมือ: Copilot ใน Codespaces
+- โฟลเดอร์: specs/005-checklist/
+- ผลทดสอบ: `cd backend && python -m pytest -q` → `4 passed in 0.02s`
+- ผลทดสอบ UI: ไม่สามารถรันได้ เพราะ repo ไม่มี `package.json`, `vite.config.*`, หรือ frontend tooling ที่ติดตั้งให้ใช้งานจริง
+- สรุปสั้น: feature นี้ยังอยู่ในระดับ foundation model/schema และ AC-SCH-01 test แบบ model-level เท่านั้น; API, service, overlap validation, transaction, UI และสิทธิ์แบบ end-to-end ยังไม่ครบตาม spec
+- จำนวนแถวตามสถานะ: ครบ 0 / ยังไม่ถึง 13 / รอ 0 / ช่องโหว่ 0
+- ข้อค้นพบใหม่: ไม่มี (AI ตรวจแล้วพบว่าโครงสร้างยังไม่ถึงระดับระบบจริง แต่ไม่พบข้อบกพร่องของข้อกำหนด/โค้ดที่เข้าข่ายช่องโหว่ในสภาวะปัจจุบัน)
+- ไฟล์ที่สร้าง: specs/005-checklist/rtm.md
+
+
