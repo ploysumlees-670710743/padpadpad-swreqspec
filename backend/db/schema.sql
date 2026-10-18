@@ -31,3 +31,21 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     can_view_schedule BOOLEAN NOT NULL DEFAULT FALSE,
     can_manage_schedule BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+CREATE TABLE IF NOT EXISTS assignments (
+    assignment_id TEXT PRIMARY KEY,
+    assignment_name TEXT NOT NULL,
+    assignment_type TEXT NOT NULL CHECK (assignment_type IN ('group', 'department')),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS participants (
+    participant_id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    selection_status TEXT NOT NULL DEFAULT 'selected' CHECK (selection_status IN ('selected', 'not_selected')),
+    current_assignment_id TEXT REFERENCES assignments (assignment_id),
+    assignment_status TEXT NOT NULL DEFAULT 'pending' CHECK (assignment_status IN ('pending', 'assigned')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
