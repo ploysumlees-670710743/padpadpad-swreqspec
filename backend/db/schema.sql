@@ -31,3 +31,34 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     can_view_schedule BOOLEAN NOT NULL DEFAULT FALSE,
     can_manage_schedule BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+CREATE TABLE IF NOT EXISTS applicants (
+    applicant_id TEXT PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    registration_timestamp TEXT NOT NULL,
+    eligibility_status TEXT NOT NULL DEFAULT 'eligible' CHECK (eligibility_status IN ('eligible', 'ineligible', 'pending')),
+    selection_status TEXT NOT NULL DEFAULT 'pending' CHECK (selection_status IN ('pending', 'selected', 'rejected')),
+    is_valid_data BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS selection_batches (
+    batch_id TEXT PRIMARY KEY,
+    requested_quota INTEGER NOT NULL,
+    actual_selected_count INTEGER NOT NULL DEFAULT 0,
+    max_quota INTEGER NOT NULL DEFAULT 150,
+    created_by TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'confirmed', 'cancelled'))
+);
+
+CREATE TABLE IF NOT EXISTS selection_audit_logs (
+    log_id TEXT PRIMARY KEY,
+    batch_id TEXT NOT NULL,
+    actor_id TEXT NOT NULL,
+    action_name TEXT NOT NULL,
+    target_type TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    action_time TEXT NOT NULL,
+    result_status TEXT NOT NULL
+);
