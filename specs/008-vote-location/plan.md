@@ -10,6 +10,14 @@ Feature นี้ต้องรองรับการลงคะแนนส
 4. กำหนดกลไกแสดงผลคะแนนแบบ Real-time และความปลอดภัยจากการส่งซ้ำแบบ double-submit
 5. จัดทำ traceability / acceptance test mapping ให้ครอบคลุม FR และ AC ใน spec
 
+## แนวทาง Backend และ Frontend
+- เทคโนโลยีที่เสนอจากรูปแบบใน repo: Python/FastAPI, SQLite/SQL, React (Vite)/JSX และ pytest; ทีมเลือกเอง ไม่ได้มาจาก spec และ spec ไม่ได้บังคับภาษา/framework เหล่านี้
+- Backend: เพิ่ม model และ schema แยกข้อมูลการใช้สิทธิ์ออกจากคะแนนที่ลงเพื่อไม่ให้เชื่อมโยงผู้ลงคะแนนกับสถานที่; ใช้ transaction และ unique constraint ตาม CON-TECH-01, CON-DATA-01 และ ASM-04
+- Backend API: เพิ่ม API สำหรับรายการสถานที่ที่เข้าเกณฑ์และการส่ง/อ่านผลคะแนน โดยตรวจ Role และสถานะระบบยืนยันตัวตนตาม FR-VOT-02, CON-SEC-01; การส่งซ้ำต้องตอบ HTTP 409 และผู้ไม่มีสิทธิ์ต้องตอบ HTTP 403
+- Frontend: เพิ่มหน้าโหวตและส่วนสรุปคะแนน เรียก API ผ่าน `frontend/src/api/client.js`; ซ่อนปุ่มสำหรับผู้ไม่มีสิทธิ์และปิดปุ่มยืนยันหลังส่ง ตาม AC-VOT-02 และ AC-VOT-03
+- การอัปเดตคะแนนต้องสะท้อนผลใหม่แบบ Real-time ตาม FR-VOT-05; ใช้กลไกที่เหมาะกับ FastAPI/React โดยไม่เปลี่ยนพฤติกรรมที่ spec กำหนด
+- การทำรายการสถานที่และข้อมูลผลสำรวจจริงยังรอ Q-02; วิธีแสดง/ตัดสินคะแนนเสมอยังรอ Q-01 จึงห้ามกำหนดผลหรือแหล่งข้อมูลแทนทีม
+
 ## Todo
 - vote-data-model: กำหนด schema / constraints / uniqueness สำหรับการลงคะแนนและสิทธิ์
 - vote-workflow: กำหนด main flow, failure flow และ response contract สำหรับ 1-คน-1-เสียง

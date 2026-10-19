@@ -31,3 +31,43 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     can_view_schedule BOOLEAN NOT NULL DEFAULT FALSE,
     can_manage_schedule BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+CREATE TABLE IF NOT EXISTS applications (
+    application_id TEXT PRIMARY KEY,
+    student_id TEXT NOT NULL,
+    application_status TEXT NOT NULL,
+    camp_name TEXT NOT NULL,
+    activity_start_at TEXT NOT NULL,
+    activity_end_at TEXT NOT NULL,
+    camp_location TEXT NOT NULL,
+    preparation_info TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_applications_student_id
+    ON applications (student_id);
+
+-- Supports FR-VOT-04, CON-TECH-01, CON-DATA-01, and NFR-SEC-01.
+CREATE TABLE IF NOT EXISTS vote_eligibility (
+    user_id TEXT NOT NULL,
+    round_id TEXT NOT NULL,
+    has_voted INTEGER NOT NULL DEFAULT 0 CHECK (has_voted IN (0, 1)),
+    PRIMARY KEY (user_id, round_id)
+);
+
+-- Supports FR-VOT-02: voting permission is scoped to a selection round.
+CREATE TABLE IF NOT EXISTS vote_eligible_users (
+    user_id TEXT NOT NULL,
+    round_id TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('lecturer', 'committee')),
+    PRIMARY KEY (user_id, round_id)
+);
+
+-- Supports CON-DATA-01: ballot rows intentionally contain no voter identifier.
+CREATE TABLE IF NOT EXISTS vote_ballots (
+    ballot_id INTEGER PRIMARY KEY,
+    round_id TEXT NOT NULL,
+    location_id TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_vote_ballots_round_id
+    ON vote_ballots (round_id);
