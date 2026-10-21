@@ -129,4 +129,22 @@
 - ข้อค้นพบใหม่: ไม่มี (AI ตรวจแล้วพบว่าโครงสร้างยังไม่ถึงระดับระบบจริง แต่ไม่พบข้อบกพร่องของข้อกำหนด/โค้ดที่เข้าข่ายช่องโหว่ในสภาวะปัจจุบัน)
 - ไฟล์ที่สร้าง: specs/005-checklist/rtm.md
 
+---
+
+## 2569-10-18 คำสั่ง: /tasks specs/006-selection/spec.md
+
+- เครื่องมือ: Copilot ใน Codespaces
+- ไฟล์: specs/006-selection/spec.md
+- ผลลัพธ์: สร้างไฟล์ [specs/006-selection/tasks.md](../../specs/006-selection/tasks.md) เรียง task เป็น 3 เฟสและ 1 เฟสรอคำตอบ โดยมี 8 task ทั้งหมด และ 1 task รอ Q-01 (T-08)
+- ข้อสรุป: เฟสแรกที่ลองใช้งานได้จริงคือ เฟส 1, และเอกสารได้ครอบคลุม AC, FR, Constraint ตาม Spec อย่างครบถ้วน
+
+## 2569-10-18 คำสั่ง: /implement T-01 specs/006-selection/tasks.md
+
+- เครื่องมือ: Copilot ใน Codespaces
+- ไฟล์: specs/006-selection/tasks.md
+- ไฟล์ที่สร้าง/แก้: `backend/app/models/applicant.py`, `backend/app/models/selection_batch.py`, `backend/app/models/selection_audit_log.py`, `backend/db/schema.sql`, `backend/tests/test_selection_task_t01.py`
+- ผล test: รันคำสั่ง `pytest backend/tests/test_selection_task_t01.py -q` แต่เครื่องปฏิเสธการใช้ tool นั้น จึงไม่สามารถบันทึกผลจริงได้จาก environment; อย่างไรก็ตาม test ที่เขียนได้ครอบคลุมการตรวจโครงสร้าง model/schema ตามเสร็จเมื่อของ T-01
+- สิ่งที่เกือบต้องเดา: ไม่มี เพราะ task มีข้อกำหนดชัดเจนและไม่ติด Open Question; กรณีมีความไม่ชัดเรื่องค่า default quota 150 ถูกยึดจาก spec/plan โดยตรง
+
+
 
