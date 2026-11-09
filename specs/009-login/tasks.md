@@ -48,7 +48,7 @@
 - แบบหน้าจอ: ไม่มี
 - ต้องทำหลัง: T-01, T-02
 - เสร็จเมื่อ: `test_AC_LOG_01_login_success_by_role` ยืนยันว่าบัญชี Active ของนักศึกษา คณะกรรมการ และอาจารย์เข้าสู่หน้าหลักพร้อมเมนูของ role ตนเอง
-- สถานะ: เสร็จ รอทีมตรวจ
+- สถานะ: เสร็จ
 
 ### T-04 สร้างหน้า Login และหน้าหลักตามบทบาท
 - รองรับ: FR-LOG-01, FR-LOG-02, FR-LOG-05, AC-LOG-01 และข้อกำหนด Responsive Design ใน spec (ไม่มี ID)
@@ -57,7 +57,7 @@
 - แบบหน้าจอ: ไม่มี UI ID และไม่มี mockup ใน spec; ทีมออกแบบเองตาม plan.md
 - ต้องทำหลัง: T-03
 - เสร็จเมื่อ: `test_AC_LOG_01_login_success_by_role_ui` ผ่านด้วย mock client และผู้ใช้เห็นหน้าหลัก/เมนูตรงกับบทบาท
-- สถานะ: เสร็จ รอทีมตรวจ
+- สถานะ: เสร็จ
 
 #### จุดตรวจเฟส 1
 - test ที่ต้องผ่านทั้งหมด: `test_login_schema_foundation`, `test_login_authentication_service`, `test_AC_LOG_01_login_success_by_role` (API และ UI)
