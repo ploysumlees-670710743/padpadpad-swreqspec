@@ -39,6 +39,10 @@ prompt-log.md                AI สร้างให้เมื่อใช้
 
 รายละเอียดคำสั่งอยู่ที่ `docs/agent-pack-README.md`
 
+## ทดลอง Prototype UC-08
+
+คู่มือเปิดระบบ ทดลองหน้าลงคะแนน และรัน automated tests อยู่ที่ [specs/008-vote-location/README.md](./specs/008-vote-location/README.md) โดยระบุข้อจำกัดของข้อมูลและสถานะจำลองไว้ด้วย
+
 ## ถ้าเป็น repo ของทีม
 
 - แก้ชื่อ repo เป็น `<ชื่อทีม>-swreqspec` และตั้งเป็น public
