@@ -57,7 +57,7 @@
 - แบบหน้าจอ: ไม่มี UI ID และไม่มี mockup ใน spec; ทีมออกแบบเองตาม plan.md
 - ต้องทำหลัง: T-03
 - เสร็จเมื่อ: `test_AC_LOG_01_login_success_by_role_ui` ผ่านด้วย mock client และผู้ใช้เห็นหน้าหลัก/เมนูตรงกับบทบาท
-- สถานะ: พร้อมทำ
+- สถานะ: เสร็จ รอทีมตรวจ
 
 #### จุดตรวจเฟส 1
 - test ที่ต้องผ่านทั้งหมด: `test_login_schema_foundation`, `test_login_authentication_service`, `test_AC_LOG_01_login_success_by_role` (API และ UI)

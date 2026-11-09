@@ -1,8 +1,8 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
-// รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-06, FR-ENR-07, FR-STA-01
+// รองรับ: FR-LOG-02, FR-LOG-05, FR-ENR-01, FR-ENR-02, FR-ENR-06, FR-ENR-07, FR-STA-01
 export function createApiClient({ baseUrl = API_BASE_URL, fetchImpl = fetch } = {}) {
-  // รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-06, FR-ENR-07, FR-STA-01
+  // รองรับ: FR-LOG-02, FR-LOG-05, FR-ENR-01, FR-ENR-02, FR-ENR-06, FR-ENR-07, FR-STA-01
   async function request(path, options = {}) {
     const response = await fetchImpl(`${baseUrl}${path}`, {
       credentials: "include",
@@ -29,6 +29,18 @@ export function createApiClient({ baseUrl = API_BASE_URL, fetchImpl = fetch } = 
   }
 
   return {
+    // รองรับ: FR-LOG-02, AC-LOG-01
+    login(username, password) {
+      return request('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+    },
+    // รองรับ: FR-LOG-05, AC-LOG-01
+    getRoleHome() {
+      return request('/home');
+    },
     getConfiguredCamp() {
       return request("/enrollment/camp");
     },
