@@ -74,12 +74,31 @@ CREATE INDEX IF NOT EXISTS idx_vote_ballots_round_id
 CREATE TABLE IF NOT EXISTS applicants (
     applicant_id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
+    phone_number TEXT NOT NULL DEFAULT '',
+    email TEXT NOT NULL DEFAULT '',
+    address TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'pending',
     registration_timestamp TEXT NOT NULL,
     eligibility_status TEXT NOT NULL DEFAULT 'eligible' CHECK (eligibility_status IN ('eligible', 'ineligible', 'pending')),
     selection_status TEXT NOT NULL DEFAULT 'pending' CHECK (selection_status IN ('pending', 'selected', 'rejected')),
     is_valid_data BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT
 );
+
+CREATE TABLE IF NOT EXISTS applicant_audit_logs (
+    audit_id TEXT PRIMARY KEY,
+    applicant_id TEXT NOT NULL REFERENCES applicants (applicant_id),
+    editor_user_id TEXT NOT NULL,
+    edited_at TEXT NOT NULL,
+    field_name TEXT NOT NULL,
+    old_value TEXT NOT NULL,
+    new_value TEXT NOT NULL,
+    change_summary TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_applicant_audit_logs_applicant_id
+    ON applicant_audit_logs (applicant_id);
 
 CREATE TABLE IF NOT EXISTS selection_batches (
     batch_id TEXT PRIMARY KEY,

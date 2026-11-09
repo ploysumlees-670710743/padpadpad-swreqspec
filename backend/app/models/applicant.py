@@ -1,13 +1,13 @@
-"""Applicant model for the selection feature."""
+"""Applicant model shared by applicant registration and editing features."""
 
 from dataclasses import dataclass
 
-# รองรับ: FR-SEL-01, CON-SEL-02, CON-SEL-03
+# รองรับ: FR-REG-01, FR-REG-04, FR-REG-05, FR-SEL-01, CON-SEL-02, CON-SEL-03
 
 
 @dataclass
 class Applicant:
-    """A candidate who may be eligible for selection under the FCFS rule."""
+    """Applicant data with editable contact fields for SPEC-REG-002."""
 
     applicant_id: str
     full_name: str
@@ -16,6 +16,11 @@ class Applicant:
     selection_status: str = "pending"
     is_valid_data: bool = True
     created_at: str | None = None
+    phone_number: str = ""
+    email: str = ""
+    address: str = ""
+    status: str = "pending"
+    updated_at: str | None = None
 
     def __post_init__(self) -> None:
         if not self.applicant_id or not self.full_name or not self.registration_timestamp:
