@@ -32,6 +32,14 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     can_manage_schedule BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+-- Supports FR-LOG-03, FR-LOG-04, ASM-LOG-01, ASM-LOG-02, and ASM-LOG-03.
+CREATE TABLE IF NOT EXISTS user_accounts (
+    username TEXT PRIMARY KEY,
+    password_hash TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('active', 'suspended')),
+    role TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS camps (
     camp_id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
