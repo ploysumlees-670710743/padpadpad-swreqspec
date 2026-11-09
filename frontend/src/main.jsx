@@ -1,9 +1,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import ApplicationStatusPage from "./pages/ApplicationStatusPage.jsx";
+import VoteLocationPage from "./pages/VoteLocationPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ApplicationStatusPage />
+    <VoteLocationPage />
   </React.StrictMode>,
 );
