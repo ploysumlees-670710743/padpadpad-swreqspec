@@ -3,14 +3,26 @@
 from fastapi import HTTPException, Request, status
 
 
-def bind_session_user(request: Request, user_id: str) -> None:
-    """Bind an authenticated identity to the signed session (CON-ENR-02, NFR-SEC-01)."""
+def bind_session_user(
+    request: Request,
+    user_id: str,
+    role: str | None = None,
+) -> None:
+    """Bind an authenticated identity to the signed session (FR-LOG-03, FR-LOG-04, CON-ENR-02, NFR-SEC-01)."""
     if not isinstance(user_id, str) or not user_id.strip():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
         )
+    if role is not None:
+        if role not in {"student", "committee", "faculty"}:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
+            )
     request.session["user_id"] = user_id
+    if role is not None:
+        request.session["role"] = role
 
 
 def get_current_user_id(request: Request) -> str:
