@@ -28,10 +28,12 @@ function formatApplicationField(fieldName, value) {
 export default function ApplicantApplicationPage({
   applicationId,
   client = apiClient,
+  demoMode = false,
 }) {
   const [application, setApplication] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -55,6 +57,20 @@ export default function ApplicantApplicationPage({
       active = false;
     };
   }, [applicationId, client]);
+
+  async function withdrawApplication() {
+    if (!window.confirm('ยืนยันการสละสิทธิ์เข้าร่วมค่ายหรือไม่?')) return;
+    setErrorMessage('');
+    setIsWithdrawing(true);
+    try {
+      const response = await client.withdrawApplication();
+      setApplication(await response.json());
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsWithdrawing(false);
+    }
+  }
 
   return (
     <section className="application-page">
@@ -125,6 +141,40 @@ export default function ApplicantApplicationPage({
                 </dl>
               </section>
             </>
+          ) : demoMode ? (
+            <section className="demo-application-status" aria-label="สถานะใบสมัคร">
+              {application.status === 'approved' ? (
+                <>
+                  <p className="demo-status-badge demo-status-approved" role="status">
+                    อนุมัติแล้ว
+                  </p>
+                  <p>คุณได้รับสิทธิ์เข้าร่วมค่าย</p>
+                  <button
+                    className="withdraw-application-button"
+                    type="button"
+                    disabled={isWithdrawing}
+                    onClick={withdrawApplication}
+                  >
+                    {isWithdrawing ? 'กำลังดำเนินการ…' : 'สละสิทธิ์'}
+                  </button>
+                </>
+              ) : application.status === 'waitlisted' ? (
+                <>
+                  <p className="demo-status-badge demo-status-waitlisted" role="status">
+                    รายชื่อสำรอง
+                  </p>
+                  <p>ลำดับสำรอง: {application.waitlist_position}</p>
+                </>
+              ) : application.status === 'withdrawn' ? (
+                <p className="demo-status-badge demo-status-withdrawn" role="status">
+                  สละสิทธิ์แล้ว
+                </p>
+              ) : application.status === 'submitted' ? (
+                <p className="application-status" role="status">รอตรวจสอบ</p>
+              ) : (
+                <p className="application-status" role="status">{application.status}</p>
+              )}
+            </section>
           ) : (
             <p className="application-status" role="status">{application.status}</p>
           )}

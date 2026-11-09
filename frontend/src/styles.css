@@ -685,6 +685,168 @@ button:disabled {
   margin: -10px 0 16px;
 }
 
+.staff-review-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.staff-review-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.75fr) minmax(0, 1.25fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.staff-review-list,
+.staff-review-details {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e3ebe8;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgb(28 69 62 / 4%);
+}
+
+.staff-review-list ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.staff-review-item {
+  display: grid;
+  width: 100%;
+  gap: 5px;
+  padding: 13px;
+  border: 1px solid #e3ebe8;
+  border-radius: 11px;
+  background: #fff;
+  color: #304b47;
+  text-align: left;
+}
+
+.staff-review-item:hover,
+.staff-review-item[aria-current='true'] {
+  border-color: #318b7b;
+  background: #f0f8f5;
+}
+
+.staff-review-item span,
+.staff-review-empty {
+  color: #73847f;
+  font-size: 12px;
+}
+
+.staff-review-item .staff-review-status,
+.staff-review-detail-status {
+  color: #a15a14;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.staff-review-details h2 {
+  margin: 0 0 12px;
+  color: #1d383a;
+  font-size: 18px;
+}
+
+.staff-review-detail-status {
+  width: fit-content;
+  margin: 0 0 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff2df;
+}
+
+.staff-review-item .status-approved,
+.staff-review-detail-status.status-approved,
+.demo-status-approved {
+  color: #276e49;
+  background: #eff9f2;
+}
+
+.staff-review-item .status-waitlisted,
+.staff-review-detail-status.status-waitlisted,
+.demo-status-waitlisted {
+  color: #8a5a00;
+  background: #fff5dc;
+}
+
+.staff-review-item .status-withdrawn,
+.staff-review-detail-status.status-withdrawn,
+.demo-status-withdrawn {
+  color: #a63d37;
+  background: #fff2f0;
+}
+
+.demo-application-status {
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid #e3ebe8;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.demo-application-status p {
+  margin: 0 0 12px;
+}
+
+.demo-status-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.withdraw-application-button {
+  padding: 9px 14px;
+  border: 1px solid #d59a92;
+  border-radius: 9px;
+  background: #fff;
+  color: #9c3932;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.withdraw-application-button:hover:not(:disabled) {
+  background: #fff2f0;
+}
+
+.withdraw-application-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.staff-review-fields {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.7fr) minmax(0, 1.3fr);
+  margin: 0;
+}
+
+.staff-review-fields dt,
+.staff-review-fields dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf1ef;
+  font-size: 13px;
+}
+
+.staff-review-fields dt {
+  color: #73847f;
+}
+
+.staff-review-fields dd {
+  color: #304b47;
+  font-weight: 600;
+}
+
 .site-footer {
   padding: 18px 24px 25px;
   color: #93a19d;
@@ -694,6 +856,10 @@ button:disabled {
 
 @media (max-width: 900px) {
   .enrollment-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .staff-review-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -802,6 +968,16 @@ button:disabled {
   .application-details {
     grid-template-columns: minmax(0, 1fr);
     padding: 8px 16px;
+  }
+
+  .staff-review-list,
+  .staff-review-details {
+    padding: 17px;
+    border-radius: 15px;
+  }
+
+  .staff-review-fields {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .application-details dt {

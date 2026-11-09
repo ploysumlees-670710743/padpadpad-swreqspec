@@ -40,7 +40,11 @@ describe('test_AC_ENR_05_application_view', () => {
       />,
     );
 
-    expect(await screen.findByText('รอตรวจสอบ')).toBeTruthy();
+    expect(
+      await screen.findByText('รอตรวจสอบ', {
+        selector: '.application-status-badge',
+      }),
+    ).toBeTruthy();
     expect(screen.getByText('ชื่อ-นามสกุล')).toBeTruthy();
     expect(screen.getByText('Applicant One')).toBeTruthy();
     expect(screen.getByText('รหัสนักศึกษา')).toBeTruthy();

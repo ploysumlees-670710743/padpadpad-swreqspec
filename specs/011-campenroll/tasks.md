@@ -106,7 +106,7 @@
 - แบบหน้าจอ: ไม่มี
 - ต้องทำหลัง: T-05, T-07, T-08
 - เสร็จเมื่อ (CR-011-01): `POST /applications/submit` ใช้ CAMP_ID จาก Server, ตรวจว่าค่ายมีอยู่และเปิดรับสมัครก่อนส่ง, ไม่รับ camp_id จาก request, ตรวจข้อมูลตาม CON-ENR-03/04 และสร้าง Application ใน transaction สถานะ `submitted` เมื่อผ่าน โดยไม่ต้องมีเอกสาร; validation failure ตอบ HTTP 422 และคง Draft
-- สถานะ: เสร็จ รอทีมตรวจ
+- สถานะ: เสร็จ
 
 ### T-10 สร้างรายการตรวจสอบเฉพาะใบสมัครที่ส่งแล้ว
 - รองรับ: FR-ENR-07, NFR-SEC-01, NFR-REL-01
@@ -116,7 +116,7 @@
 - ต้องทำหลัง: T-02, T-09
 - เสร็จเมื่อ: `GET /applications/review` สำหรับเจ้าหน้าที่ที่มีสิทธิ์คืนเฉพาะ Application สถานะ `submitted` ของ CAMP_ID จาก Server และไม่คืน Draft/ใบสมัครค่ายอื่น โดย `test_staff_review_lists_submitted_only_AC_ENR_04` ผ่าน
 - Blocker: แม้ทีมเลือก PostgreSQL เป็นแหล่งจัดเก็บและตรวจ Role ผ่านตาราง `camp_enrollment_staff` แต่ยังไม่มีกระบวนการ Login ที่ยืนยันตัวตนจริงและผูก `user_id` ที่เชื่อถือได้กับ Session; ต้องกำหนด Authentication และ Migration/กระบวนการดูแล Role ก่อนเริ่ม implement
-- สถานะ: Deferred (เลื่อนทำชั่วคราว; ยังไม่เสร็จ)
+- สถานะ: พร้อมทำ
 
 ### T-11 เพิ่มการยืนยันส่งในหน้าฟอร์ม
 - รองรับ: FR-ENR-06, FR-ENR-07
@@ -266,4 +266,3 @@
 - Open Questions ใน spec: ไม่มี; ไม่มี task ที่รอ Q-xx
 - CR-011-01 ระบุว่าไม่ใช้เอกสารแนบ; schema/Model เดิมคงอยู่เพื่อรักษา legacy data และไม่มีการ Migration/Seed จริงตามคำขอ
 - ไม่สร้าง workflow อนุมัติ/ปฏิเสธหรือแจ้งเตือนเมื่ออนุมัติ เพราะอยู่นอกขอบเขตของ spec; เฟสส่งใบสมัครทำเพียงให้รายการ `submitted` ปรากฏแก่เจ้าหน้าที่ตรวจสอบ
-

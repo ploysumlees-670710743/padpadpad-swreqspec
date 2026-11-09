@@ -1,7 +1,7 @@
 # Test cases: สมัครเข้าร่วมค่าย (Camp Enroll)
 อ้างอิง: [spec.md](./spec.md) SPEC-ENR-011 Draft v4, Change Request CR-011-01
 
-Test cases ชุดก่อน Change Request เก็บไว้ที่ [test-cases-pre-cr.md](./test-cases-pre-cr.md) เพื่อรักษาประวัติและหลักฐานเดิม
+เอกสารนี้เป็น Test Cases ฉบับปัจจุบันที่ได้รับอนุมัติสำหรับ Change Request CR-011-01
 
 | TC ID | AC | แบบ | Given | When | Then (ตรวจอะไรบ้าง) | ตรวจด้วย | ชื่อ test | สถานะ |
 |---|---|---|---|---|---|---|---|---|

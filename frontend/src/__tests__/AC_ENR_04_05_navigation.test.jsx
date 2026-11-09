@@ -26,7 +26,7 @@ function fillForm() {
 
 afterEach(() => {
   cleanup();
-  sessionStorage.clear();
+  localStorage.clear();
   window.history.replaceState(null, '', '/');
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
@@ -47,14 +47,14 @@ describe('AC-ENR-04 และ AC-ENR-05: navigation and refresh', () => {
 
     fillForm();
     fireEvent.click(screen.getByRole('button', { name: 'ยืนยันส่งใบสมัคร' }));
-    expect(await screen.findByText('รอตรวจสอบ')).toBeTruthy();
+    expect(await screen.findByText('อนุมัติแล้ว', { selector: '.demo-status-badge' })).toBeTruthy();
     expect(screen.getByText('ผู้สมัคร ตัวอย่าง')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'ยืนยันส่งใบสมัคร' })).toBeNull();
     expect(new URLSearchParams(location.search).get('application')).toBe('demo-application-001');
     first.unmount();
 
     render(<App />);
-    expect(await screen.findByText('รอตรวจสอบ')).toBeTruthy();
+    expect(await screen.findByText('อนุมัติแล้ว', { selector: '.demo-status-badge' })).toBeTruthy();
     expect(screen.getByText('ผู้สมัคร ตัวอย่าง')).toBeTruthy();
     expect(fetchImpl).not.toHaveBeenCalled();
   });
@@ -81,7 +81,7 @@ describe('AC-ENR-04 และ AC-ENR-05: navigation and refresh', () => {
     fillForm();
     fireEvent.click(screen.getByRole('button', { name: 'ยืนยันส่งใบสมัคร' }));
 
-    expect(await screen.findByText('รอตรวจสอบ')).toBeTruthy();
+    expect(await screen.findByText('รอตรวจสอบ', { selector: '.application-status-badge' })).toBeTruthy();
     expect(client.getApplication).toHaveBeenCalledWith('application-001');
     expect(client.saveDraft).toHaveBeenCalledWith(expect.objectContaining({
       full_name: 'ผู้สมัคร ตัวอย่าง',
@@ -91,7 +91,7 @@ describe('AC-ENR-04 และ AC-ENR-05: navigation and refresh', () => {
     first.unmount();
 
     render(<App client={client} />);
-    await screen.findByText('รอตรวจสอบ');
+    await screen.findByText('รอตรวจสอบ', { selector: '.application-status-badge' });
     await waitFor(() => expect(client.getApplication).toHaveBeenCalledTimes(2));
     expect(screen.getByText('ผู้สมัคร ตัวอย่าง')).toBeTruthy();
   });

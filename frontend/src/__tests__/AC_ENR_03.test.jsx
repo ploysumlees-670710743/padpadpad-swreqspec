@@ -32,6 +32,79 @@ const camp = {
 };
 
 describe('test_AC_ENR_03_food_allergy_validation', () => {
+  it('shows and validates the year-level detail when other is selected', async () => {
+    const validationError = Object.assign(new Error('Validation failed.'), {
+      status: 422,
+      errors: [
+        {
+          field_name: 'year_level_other',
+          error_message: 'กรุณากรอกข้อมูลนี้',
+        },
+      ],
+    });
+    const client = {
+      getConfiguredCamp: vi.fn().mockResolvedValue(jsonResponse(camp)),
+      getDraft: vi.fn().mockResolvedValue(jsonResponse({ form_data: {} }, 404)),
+      saveDraft: vi.fn().mockResolvedValue(jsonResponse({ draft_id: 'draft-001' })),
+      submitApplication: vi
+        .fn()
+        .mockRejectedValueOnce(validationError)
+        .mockResolvedValueOnce(jsonResponse({
+          application_id: 'application-001',
+          status: 'submitted',
+        }, 201)),
+    };
+
+    render(<CampEnrollmentPage client={client} />);
+    fireEvent.change(await screen.findByLabelText('ชื่อ-นามสกุล'), {
+      target: { value: 'ผู้สมัคร ตัวอย่าง' },
+    });
+    fireEvent.change(screen.getByLabelText('ชื่อเล่น'), {
+      target: { value: 'น้อง' },
+    });
+    fireEvent.change(screen.getByLabelText('รหัสนักศึกษา'), {
+      target: { value: '66000001' },
+    });
+    fireEvent.change(screen.getByLabelText('ชั้นปี'), {
+      target: { value: 'other' },
+    });
+    fireEvent.change(screen.getByLabelText('เบอร์โทรศัพท์'), {
+      target: { value: '0800000000' },
+    });
+    fireEvent.change(screen.getByLabelText('ช่องทางติดต่อ'), {
+      target: { value: 'line-id' },
+    });
+    fireEvent.click(screen.getByRole('radio', { name: 'ไม่มี' }));
+
+    const yearLevelDetail = screen.getByLabelText('โปรดระบุชั้นปี');
+    expect(yearLevelDetail).toBeTruthy();
+    expect(yearLevelDetail.value).toBe('');
+
+    fireEvent.click(screen.getByRole('button', { name: 'ยืนยันส่งใบสมัคร' }));
+
+    expect(await screen.findByText('กรุณากรอกข้อมูลนี้')).toBeTruthy();
+    expect(yearLevelDetail.getAttribute('aria-invalid')).toBe('true');
+    expect(yearLevelDetail.getAttribute('aria-describedby')).toBe(
+      'year_level_other-error',
+    );
+    expect(document.getElementById('year_level_other-error').textContent).toBe(
+      'กรุณากรอกข้อมูลนี้',
+    );
+    expect(screen.queryByText('รอตรวจสอบ')).toBeNull();
+
+    fireEvent.change(yearLevelDetail, { target: { value: 'ปี 7' } });
+    fireEvent.click(screen.getByRole('button', { name: 'ยืนยันส่งใบสมัคร' }));
+
+    expect(await screen.findByText('รอตรวจสอบ')).toBeTruthy();
+    expect(client.saveDraft).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        year_level: 'other',
+        year_level_other: 'ปี 7',
+      }),
+    );
+    expect(client.submitApplication).toHaveBeenCalledTimes(2);
+  });
+
   it('requires allergy details when yes is selected, then permits submission when provided', async () => {
     const validationError = Object.assign(new Error('Validation failed.'), {
       status: 422,

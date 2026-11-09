@@ -3,8 +3,8 @@ import pytest
 from backend.app.validators.enrollment_validator import validate_enrollment_form
 
 
-def _valid_form(**overrides: str) -> dict[str, str]:
-    form = {
+def _valid_form(**overrides: object) -> dict[str, object]:
+    form: dict[str, object] = {
         "full_name": "ผู้สมัคร ตัวอย่าง",
         "nickname": "น้อง",
         "student_id": "66000001",
@@ -83,6 +83,77 @@ def test_allergy_details_are_rejected_when_food_allergy_is_none() -> None:
         {
             "field_name": "food_allergy_details",
             "error_message": "ไม่ต้องระบุรายละเอียดเมื่อเลือกไม่มี",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "details",
+    [[], ["แพ้ถั่วลิสง"], {}, {"allergy": "ถั่ว"}, 0, False, None],
+    ids=[
+        "empty-array",
+        "array-with-value",
+        "empty-object",
+        "object-with-value",
+        "number",
+        "boolean",
+        "null",
+    ],
+)
+def test_non_text_allergy_details_are_rejected_when_food_allergy_is_none(
+    details: object,
+) -> None:
+    errors = validate_enrollment_form(
+        _valid_form(food_allergy="no", food_allergy_details=details)
+    )
+
+    assert errors == [
+        {
+            "field_name": "food_allergy_details",
+            "error_message": "ไม่ต้องระบุรายละเอียดเมื่อเลือกไม่มี",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "details",
+    [[], ["แพ้ถั่วลิสง"], {}, {"allergy": "ถั่ว"}, 0, False, None],
+    ids=[
+        "empty-array",
+        "array-with-value",
+        "empty-object",
+        "object-with-value",
+        "number",
+        "boolean",
+        "null",
+    ],
+)
+def test_non_text_allergy_details_are_rejected_when_food_allergy_is_yes(
+    details: object,
+) -> None:
+    errors = validate_enrollment_form(
+        _valid_form(food_allergy="yes", food_allergy_details=details)
+    )
+
+    assert errors == [
+        {
+            "field_name": "food_allergy_details",
+            "error_message": "กรุณากรอกข้อมูลนี้",
+        }
+    ]
+
+
+@pytest.mark.parametrize("details", ["", "   "])
+def test_blank_string_allergy_details_follow_allergy_choice(details: str) -> None:
+    assert validate_enrollment_form(
+        _valid_form(food_allergy="no", food_allergy_details=details)
+    ) == []
+    assert validate_enrollment_form(
+        _valid_form(food_allergy="yes", food_allergy_details=details)
+    ) == [
+        {
+            "field_name": "food_allergy_details",
+            "error_message": "กรุณากรอกข้อมูลนี้",
         }
     ]
 

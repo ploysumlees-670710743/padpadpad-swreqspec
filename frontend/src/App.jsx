@@ -4,14 +4,19 @@ import { apiClient } from './api/client.js';
 import { createDemoApiClient } from './api/demoClient.js';
 import CampEnrollmentPage from './pages/CampEnrollmentPage.jsx';
 import ApplicantApplicationPage from './pages/ApplicantApplicationPage.jsx';
+import StaffReviewPage from './pages/StaffReviewPage.jsx';
 
 export const ApiClientContext = createContext(apiClient);
 
 // รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-04, FR-ENR-07
-function EnrollmentFlow({ client }) {
+function EnrollmentFlow({ client, demoMode = false }) {
   const [applicationId, setApplicationId] = useState(
     () => new URLSearchParams(window.location.search).get('application'),
   );
+  const [isRestoringApplication, setIsRestoringApplication] = useState(
+    () => demoMode && !new URLSearchParams(window.location.search).get('application'),
+  );
+  const [restoreError, setRestoreError] = useState('');
 
   useEffect(() => {
     const handleNavigation = () => {
@@ -21,6 +26,34 @@ function EnrollmentFlow({ client }) {
     return () => window.removeEventListener('popstate', handleNavigation);
   }, []);
 
+  useEffect(() => {
+    if (!demoMode || applicationId) {
+      setIsRestoringApplication(false);
+      return undefined;
+    }
+
+    let active = true;
+    setIsRestoringApplication(true);
+    setRestoreError('');
+    client.getApplicantApplication()
+      .then(async (response) => {
+        if (active && response.status === 200) {
+          const application = await response.json();
+          setApplicationId(application.application_id);
+        }
+      })
+      .catch((error) => {
+        if (active) setRestoreError(error.message);
+      })
+      .finally(() => {
+        if (active) setIsRestoringApplication(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [applicationId, client, demoMode]);
+
   function showApplication(id) {
     const url = new URL(window.location.href);
     url.searchParams.set('application', id);
@@ -29,7 +62,15 @@ function EnrollmentFlow({ client }) {
   }
 
   return applicationId ? (
-    <ApplicantApplicationPage applicationId={applicationId} client={client} />
+    <ApplicantApplicationPage
+      applicationId={applicationId}
+      client={client}
+      demoMode={demoMode}
+    />
+  ) : isRestoringApplication ? (
+    <p role="status">กำลังกู้คืนข้อมูลใบสมัคร…</p>
+  ) : restoreError ? (
+    <p className="notice notice-error" role="alert">{restoreError}</p>
   ) : (
     <CampEnrollmentPage client={client} onSubmitted={showApplication} />
   );
@@ -37,14 +78,25 @@ function EnrollmentFlow({ client }) {
 
 // รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-04, FR-ENR-07
 function DemoApp() {
+  const isAdminRoute = window.location.pathname === '/demo/admin';
+  const isApplicantRoute = window.location.pathname === '/demo/applicant';
+  const demoIdentity = isAdminRoute ? 'admin' : 'applicant';
+  const applicantId = isAdminRoute
+    ? 'demo-admin-001'
+    : isApplicantRoute
+      ? 'demo-applicant-001'
+      : 'demo-applicant';
   const client = useMemo(
     () => createDemoApiClient({
+      applicantId,
+      identity: demoIdentity,
       storage: {
-        getItem: (key) => window.sessionStorage.getItem(key),
-        setItem: (key, value) => window.sessionStorage.setItem(key, value),
+        getItem: (key) => window.localStorage.getItem(key),
+        setItem: (key, value) => window.localStorage.setItem(key, value),
+        removeItem: (key) => window.localStorage.removeItem(key),
       },
     }),
-    [],
+    [applicantId, demoIdentity],
   );
 
   return (
@@ -57,7 +109,9 @@ function DemoApp() {
             <small>ระบบรับสมัครนักศึกษา</small>
           </span>
         </a>
-        <span className="header-label">CAMP APPLICATION</span>
+        <span className="header-label">
+          {isAdminRoute ? 'STAFF REVIEW DEMO' : 'CAMP APPLICATION'}
+        </span>
       </header>
       <main className="site-content">
         <p className="demo-banner" role="note">
@@ -65,7 +119,9 @@ function DemoApp() {
           <strong>Demo Mode — ข้อมูลจำลอง</strong>
           <span>ไม่เชื่อมต่อ Backend และไม่บันทึกใน PostgreSQL</span>
         </p>
-        <EnrollmentFlow client={client} />
+        {isAdminRoute
+          ? <StaffReviewPage client={client} />
+          : <EnrollmentFlow client={client} demoMode />}
       </main>
       <footer className="site-footer">
         ตัวอย่างสำหรับการสาธิตเท่านั้น · ข้อมูลทั้งหมดเป็นข้อมูลจำลอง

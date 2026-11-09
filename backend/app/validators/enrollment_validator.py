@@ -76,14 +76,22 @@ def validate_enrollment_form(
                 "error_message": "กรุณาเลือกข้อมูลการแพ้อาหาร",
             }
         )
-    elif food_allergy == "yes" and not _has_text(form_data.get("food_allergy_details")):
+    elif food_allergy == "yes" and not _has_text(
+        form_data.get("food_allergy_details")
+    ):
         errors.append(
             {
                 "field_name": "food_allergy_details",
                 "error_message": MISSING_VALUE_MESSAGE,
             }
         )
-    elif food_allergy == "no" and _has_text(form_data.get("food_allergy_details")):
+    elif food_allergy == "no" and (
+        (
+            "food_allergy_details" in form_data
+            and not isinstance(form_data["food_allergy_details"], str)
+        )
+        or _has_text(form_data.get("food_allergy_details"))
+    ):
         errors.append(
             {
                 "field_name": "food_allergy_details",
