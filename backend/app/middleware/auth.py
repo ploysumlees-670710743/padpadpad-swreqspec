@@ -3,6 +3,27 @@
 from fastapi import HTTPException, Request, status
 
 
+def bind_session_user(request: Request, user_id: str) -> None:
+    """Bind an authenticated identity to the signed session (CON-ENR-02, NFR-SEC-01)."""
+    if not isinstance(user_id, str) or not user_id.strip():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    request.session["user_id"] = user_id
+
+
+def get_current_user_id(request: Request) -> str:
+    """Read the identity only from the signed session (CON-ENR-02, NFR-SEC-01)."""
+    user_id = request.session.get("user_id")
+    if not isinstance(user_id, str) or not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    return user_id
+
+
 def get_current_student_id(request: Request) -> str:
     """Read the trusted authenticated identity and fail closed (CON-SEC-01)."""
 

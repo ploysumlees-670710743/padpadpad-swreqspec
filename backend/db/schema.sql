@@ -32,19 +32,58 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     can_manage_schedule BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+CREATE TABLE IF NOT EXISTS camps (
+    camp_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('open', 'closed')),
+    open_date TEXT,
+    close_date TEXT,
+    required_fields_json TEXT NOT NULL DEFAULT '[]',
+    required_documents_json TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS applications (
     application_id TEXT PRIMARY KEY,
-    student_id TEXT NOT NULL,
-    application_status TEXT NOT NULL,
-    camp_name TEXT NOT NULL,
-    activity_start_at TEXT NOT NULL,
-    activity_end_at TEXT NOT NULL,
-    camp_location TEXT NOT NULL,
-    preparation_info TEXT NOT NULL
+    student_id TEXT,
+    application_status TEXT,
+    camp_name TEXT,
+    activity_start_at TEXT,
+    activity_end_at TEXT,
+    camp_location TEXT,
+    preparation_info TEXT,
+    applicant_id TEXT,
+    camp_id TEXT REFERENCES camps (camp_id),
+    form_data_json TEXT,
+    status TEXT,
+    submitted_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_applications_student_id
     ON applications (student_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_applications_applicant_camp
+    ON applications (applicant_id, camp_id);
+
+CREATE TABLE IF NOT EXISTS application_drafts (
+    draft_id TEXT PRIMARY KEY,
+    applicant_id TEXT NOT NULL,
+    camp_id TEXT NOT NULL REFERENCES camps (camp_id),
+    form_data_json TEXT NOT NULL,
+    last_saved_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (applicant_id, camp_id)
+);
+
+CREATE TABLE IF NOT EXISTS application_documents (
+    document_id TEXT PRIMARY KEY,
+    document_type TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    file_content BYTEA NOT NULL,
+    validation_status TEXT NOT NULL DEFAULT 'pending',
+    draft_id TEXT REFERENCES application_drafts (draft_id),
+    application_id TEXT REFERENCES applications (application_id),
+    validated_at TEXT
+);
 
 -- Supports FR-VOT-04, CON-TECH-01, CON-DATA-01, and NFR-SEC-01.
 CREATE TABLE IF NOT EXISTS vote_eligibility (
