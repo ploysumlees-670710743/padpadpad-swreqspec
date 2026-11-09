@@ -38,7 +38,7 @@
 - ไฟล์ที่แตะ: `backend/app/api/applicants.py`, `backend/app/services/applicant_service.py`, `backend/app/validators/applicant_validator.py`, `backend/app/db/transaction.py`, `backend/tests/test_AC_REG_01.py`
 - แบบหน้าจอ: ไม่มี
 - ต้องทำหลัง: T-01, T-02
-- เสร็จเมื่อ: `GET /applicants/{applicant_id}/edit` คืนข้อมูลเดิม และ `PUT /applicants/{applicant_id}` อัปเดตข้อมูลกับ Audit Log ใน transaction เดียวกัน โดยบันทึกเฉพาะฟิลด์ที่เปลี่ยนและมีผลตอบสนองเฉลี่ยไม่เกิน 1.5 วินาที
+- เสร็จเมื่อ: `GET /applicants/{applicant_id}/edit` คืนข้อมูลเดิม, `PUT /applicants/{applicant_id}` อัปเดตข้อมูลกับ Audit Log ใน transaction เดียวกัน และ `GET /applicants/{applicant_id}/audit-log` คืนประวัติการเปลี่ยนแปลง โดยบันทึกเฉพาะฟิลด์ที่เปลี่ยนและมีผลตอบสนองเฉลี่ยไม่เกิน 1.5 วินาที
 - สถานะ: เสร็จ รอทีมตรวจ
 
 ### T-04 สร้างหน้าจอฟอร์มแก้ไขและการยืนยัน

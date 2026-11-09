@@ -56,14 +56,14 @@
 - POST /applicants/{applicant_id}/validate — ตรวจสอบข้อมูลใหม่ก่อนบันทึก; input: payload ข้อมูลฟอร์ม; output: รายการข้อผิดพลาดหรือผ่าน validation; รองรับ FR-REG-02, FR-REG-03
 - PUT /applicants/{applicant_id} — บันทึกข้อมูลใหม่หลังยืนยัน; input: payload ที่ต้องการอัปเดต; output: สถานะสำเร็จ/ล้มเหลว; รองรับ FR-REG-04, FR-REG-05, DOM-TXN-01
 - POST /applicants/{applicant_id}/cancel-edit — ยกเลิกการแก้ไขและคืนค่าเดิม; input: applicant_id; output: สถานะยกเลิกพร้อมปิดฟอร์ม; รองรับ FR-REG-06
-- GET /applicants/{applicant_id}/audit-log — ดึงประวัติการเปลี่ยนแปลง; input: applicant_id; output: AuditLog list; รองรับ DOM-AUD-01
+- GET /applicants/{applicant_id}/audit-log — ดึงประวัติการเปลี่ยนแปลง; input: applicant_id; output: `{applicant_id, audit_log[]}` หรือ 404 เมื่อไม่พบผู้สมัคร; รองรับ DOM-AUD-01
 - UI page: /applicants/:id/edit — หน้าจอแก้ไขข้อมูลพร้อม highlight ช่องที่ผิดพลาด และข้อความแจ้งเตือนตาม NFR-USE-01
 
 ## 5. ตารางตรวจ Constraints
 
 | Constraint ID | ถูกนำไปใช้ที่ไหนใน plan | สถานะ |
 |---|---|---|
-| DOM-AUD-01 | AuditLog entity และ API GET/PUT /applicants/{applicant_id}/audit-log; บันทึกผู้แก้ไข วันเวลา ค่าเดิม ค่าใหม่ | ใช้แล้ว |
+| DOM-AUD-01 | AuditLog entity, API GET /applicants/{applicant_id}/audit-log และการบันทึก Audit Log ใน PUT /applicants/{applicant_id}; บันทึกผู้แก้ไข วันเวลา ค่าเดิม ค่าใหม่ | ใช้แล้ว |
 | DOM-TXN-01 | PUT /applicants/{applicant_id} ให้ update Applicant และ insert AuditLog ใน transaction เดียวกัน | ใช้แล้ว |
 | SEC-RBAC-01 | UserAccount role และการป้องกันการเข้าถึงหน้าจอ/endpoint สำหรับคณะกรรมการหรือผู้ดูแลระบบ | ใช้แล้ว |
 

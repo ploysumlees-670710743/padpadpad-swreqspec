@@ -67,3 +67,55 @@ def test_AC_REG_03_cancel_restores_original_state(tmp_path: Path) -> None:
         ).fetchone()[0]
 
     assert audit_count == 0
+
+
+def test_TC_REG_03_1_cancel_restores_original_and_closes_form(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    original = client.get("/applicants/app-003/edit").json()
+    response = client.post("/applicants/app-003/cancel-edit")
+
+    assert response.json()["status"] == "cancelled"
+    assert response.json()["applicant"] == original
+    with sqlite3.connect(tmp_path / "applicant.sqlite3") as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM applicant_audit_logs WHERE applicant_id = ?",
+            ("app-003",),
+        ).fetchone()[0] == 0
+
+
+def test_TC_REG_03_2_cancel_all_changed_fields(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    original = client.get("/applicants/app-003/edit").json()
+    response = client.post("/applicants/app-003/cancel-edit")
+
+    assert response.status_code == 200
+    assert response.json()["applicant"] == original
+    with sqlite3.connect(tmp_path / "applicant.sqlite3") as connection:
+        assert connection.execute(
+            "SELECT phone_number, full_name, email, address, status "
+            "FROM applicants WHERE applicant_id = ?",
+            ("app-003",),
+        ).fetchone() == (
+            original["phone_number"],
+            original["full_name"],
+            original["email"],
+            original["address"],
+            original["status"],
+        )
+
+
+def test_TC_REG_03_3_cancel_without_changes(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    original = client.get("/applicants/app-003/edit").json()
+    response = client.post("/applicants/app-003/cancel-edit")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "cancelled", "applicant": original}
+    with sqlite3.connect(tmp_path / "applicant.sqlite3") as connection:
+        assert connection.execute(
+            "SELECT COUNT(*) FROM applicant_audit_logs WHERE applicant_id = ?",
+            ("app-003",),
+        ).fetchone()[0] == 0

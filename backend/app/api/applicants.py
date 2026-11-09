@@ -1,6 +1,6 @@
 """Applicant editing API boundary."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 
 from backend.app.middleware.authz import get_current_editor
@@ -46,9 +46,32 @@ def open_edit_form(
 
     applicant = service.get_for_edit(applicant_id)
     if applicant is None:
-        # ASM-01 places missing applicants outside this edit-flow precondition.
-        return {"applicant_id": applicant_id, "status": "edit-ready"}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Applicant not found")
     return applicant
+
+
+@router.get("/search")
+def search_applicants(
+    query: str = Query(min_length=1),
+    _: UserAccount = Depends(get_current_editor),
+    service: ApplicantService = Depends(get_applicant_service),
+) -> dict[str, object]:
+    """Search applicants by ID or full name for FR-REG-01."""
+
+    return {"applicants": service.search(query)}
+
+
+@router.get("/{applicant_id}/audit-log")
+def get_audit_log(
+    applicant_id: str,
+    _: UserAccount = Depends(get_current_editor),
+    service: ApplicantService = Depends(get_applicant_service),
+) -> dict[str, object]:
+    """Return the applicant's change history for DOM-AUD-01."""
+
+    if service.get_for_edit(applicant_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Applicant not found")
+    return {"applicant_id": applicant_id, "audit_log": service.get_audit_log(applicant_id)}
 
 
 @router.put("/{applicant_id}")

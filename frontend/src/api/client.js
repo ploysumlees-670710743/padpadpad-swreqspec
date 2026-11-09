@@ -31,6 +31,15 @@ export async function getApplicantForEdit(applicantId) {
   return readJson(response, "Applicant edit request");
 }
 
+// Searches applicants by ID or full name (FR-REG-01).
+export async function searchApplicants(query) {
+  const response = await fetch(
+    `${API_BASE_URL}/applicants/search?query=${encodeURIComponent(query)}`,
+    { credentials: "include" },
+  );
+  return readJson(response, "Applicant search request");
+}
+
 // Saves edited applicant details and receives the audit result (FR-REG-04, FR-REG-05).
 export async function updateApplicant(applicantId, changes) {
   const response = await fetch(`${API_BASE_URL}/applicants/${encodeURIComponent(applicantId)}`, {

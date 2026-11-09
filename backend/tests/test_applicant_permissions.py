@@ -20,15 +20,15 @@ def _client_for_user(user: UserAccount | None) -> TestClient:
 
 # Given: ผู้ใช้ที่ยืนยันตัวตนแล้วมีบทบาท committee หรือ admin;
 # When: เปิด route แก้ไขข้อมูลผู้สมัคร;
-# Then: ระบบต้องอนุญาตให้เข้าถึงโครง route ได้
+# Then: ระบบต้องอนุญาตให้เข้าถึงโครง route ได้ แม้ผู้สมัครตัวอย่างจะไม่มีอยู่จริง
 def test_authorized_applicant_roles_can_access_edit_route() -> None:
     for role in ("committee", "admin"):
         response = _client_for_user(
             UserAccount(user_id=f"{role}-1", role=role, display_name=role)
         ).get("/applicants/app-1/edit")
 
-        assert response.status_code == 200
-        assert response.json() == {"applicant_id": "app-1", "status": "edit-ready"}
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Applicant not found"
 
 
 # Given: ผู้ใช้ไม่มีบทบาทที่ SEC-RBAC-01 อนุญาต;
@@ -49,3 +49,11 @@ def test_missing_identity_is_unauthorized() -> None:
     response = _client_for_user(None).get("/applicants/app-1/edit")
 
     assert response.status_code == 401
+
+
+def test_unauthorized_applicant_role_cannot_cancel_edit() -> None:
+    response = _client_for_user(
+        UserAccount(user_id="staff-1", role="staff", display_name="staff")
+    ).post("/applicants/app-1/cancel-edit")
+
+    assert response.status_code == 403

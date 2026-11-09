@@ -2,6 +2,13 @@
 
 บันทึกทุกครั้งที่ใช้ AI กับ repo นี้ เขียนต่อท้ายเรื่อย ๆ ไม่ต้องลบของเก่า
 
+## 2026-11-09 คำสั่ง: แก้ F-01, F-02 และ F-10
+
+- F-01: ขยาย AC-REG-01 และ TC-REG-01-1 ให้ตรวจว่าระบบแสดงข้อมูลเดิมครบทุกฟิลด์ก่อนแก้ไข
+- F-02: เปลี่ยน `GET /applicants/{applicant_id}/edit` กรณีไม่พบผู้สมัครให้คืน 404 และเพิ่ม test
+- F-10: เพิ่ม implementation ของ `GET /applicants/{applicant_id}/audit-log` ใน API/service และเพิ่ม test
+- ปรับ T-03 และ RTM ให้ trace API audit-log
+
 ---
 
 ## 2026-09-20 15:00 คำสั่ง: /clarify
@@ -170,6 +177,29 @@
 
 ---
 
+## 2026-11-09 19:11 คำสั่ง: แก้ F-11 ถึง F-15
+
+- F-11: เพิ่ม `test_TC_REG_03_3_cancel_without_changes`
+- F-12: เพิ่มการค้นหาผู้สมัครด้วยรหัสหรือชื่อ ผ่าน API, client และ `ApplicantSearchPage`
+- F-13: ปฏิเสธการแก้ไขเมื่อ `status=completed`
+- F-14: เพิ่ม retention policy 3 เดือนด้วย `retention_until`
+- F-15: เพิ่ม frontend assertions ตรวจชื่อ อีเมล ที่อยู่ และสถานะเดิมก่อนแก้ไข
+- ผล test: backend `PYTHONPATH=.. pytest -q` ผ่าน 34 tests; frontend `npm test -- --run` ผ่าน 7 tests; build ผ่าน
+- RTM: ย้าย F-11 ถึง F-15 ไปหัวข้อ `แก้แล้ว`
+
+---
+
+## 2026-11-09 19:16 คำสั่ง: /verify spec/002-edit-applicant-information
+
+- ผล `cd backend && pytest -v`: เก็บ test ไม่ได้ 10 errors เพราะ `ModuleNotFoundError: No module named 'backend'` จาก import path
+- ผล `cd backend && PYTHONPATH=.. pytest -q`: backend ผ่าน 34 tests, ไม่ผ่าน 0 tests
+- ผล `cd frontend && npm test`: frontend ผ่าน 7 tests จาก 4 test files, ไม่ผ่าน 0 tests
+- จำนวนแถวตามรอยไปข้างหน้า: ครบ 9, ยังไม่ถึง 0, รอ Q-xx 0, ช่องโหว่ 0
+- ข้อค้นพบใหม่: F-16 API/หน้าค้นหาไม่ได้อยู่ใน plan/tasks เดิม; F-17 test retention ยังตรวจไม่ครบ 3 เดือน; F-18 schema initialization ไม่มี migration สำหรับฐานข้อมูลเดิมที่ยังไม่มี `retention_until`
+- ขอบเขต: แก้เฉพาะ `specs/002-edit-applicant-information/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks
+
+---
+
 ## 2026-11-09 09:23 คำสั่ง: /implement T-05 specs/002-edit-applicant-information/task.md
 
 - ไฟล์ที่สร้างหรือแก้: `backend/app/validators/applicant_validator.py`, `backend/app/api/applicants.py`, `backend/app/services/applicant_service.py`, `backend/tests/test_AC_REG_02.py`, `specs/002-edit-applicant-information/tasks.md`
@@ -297,4 +327,67 @@
 - ข้อค้นพบเดิมที่ยังพบ: F-01, F-02, F-05, F-06, F-07, F-08, F-09, F-10
 - ข้อค้นพบใหม่: ไม่มี
 - การปรับปรุงจากรอบก่อน: F-05 ระบุว่าการตรวจสิทธิ์ PUT มีแล้วแต่ cancel ยังไม่มี; F-08 เหลือเฉพาะ TC-REG-03-1 และ TC-REG-03-2 เพราะ AC-REG-01 และ AC-REG-02 มี test ตามแถวแล้ว
+- ขอบเขต: แก้เฉพาะ `specs/002-edit-applicant-information/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks
+
+---
+
+## 2026-11-09 15:18 คำสั่ง: /testcases AC-REG-01 specs/002-edit-applicant-information/
+
+- โหมด: ตรวจโหมดเขียน test จากแถวสถานะ `ใช้ได้`
+- TC ID ที่ตรวจ: `TC-REG-01-1`, `TC-REG-01-2`, `TC-REG-01-3`
+- ผลการตรวจ: ทั้ง 3 แถวมี test ชื่อตรงตามตารางอยู่แล้วใน `backend/tests/test_AC_REG_01.py` จึงไม่เพิ่ม test ซ้ำและไม่แก้ test เดิม
+- ผล test: `cd backend && PYTHONPATH=.. pytest -v` ผ่าน 26 tests, ไม่ผ่าน 0 tests
+
+---
+
+## 2026-11-09 15:21 คำสั่ง: /testcases AC-REG-02 specs/002-edit-applicant-information/
+
+- โหมด: ตรวจโหมดเขียน test จากแถวสถานะ `ใช้ได้`
+- TC ID ที่ตรวจ: `TC-REG-02-1`, `TC-REG-02-2`, `TC-REG-02-3`
+- ผลการตรวจ: ทั้ง 3 แถวมี test ชื่อตรงตามตารางอยู่แล้วใน `backend/tests/test_AC_REG_02.py` จึงไม่เพิ่ม test ซ้ำและไม่แก้ test เดิม
+- ผล test: `cd backend && PYTHONPATH=.. pytest -v` ผ่าน 26 tests, ไม่ผ่าน 0 tests
+- ข้อจำกัดเดิม: แถวที่ระบุ `pytest + vitest` ยังไม่มี frontend test เพราะ `frontend/package.json` ไม่มี script `test` และไม่มี test runner
+
+---
+
+## 2026-11-09 15:27 คำสั่ง: ติดตั้ง Vitest เป็น Test Runner และเพิ่ม test script ใน package.json
+
+- เพิ่ม `vitest` ใน `frontend/package.json` และ `frontend/package-lock.json` เป็น `devDependencies`
+- ยืนยัน scripts: `test: vitest` และ `test:run: vitest run`
+- ผล `cd frontend && npm run test:run`: ผ่าน 3 tests จาก 3 test files
+- ผล `cd frontend && npm run build`: ผ่าน
+
+---
+
+## 2026-11-09 16:02 คำสั่ง: /verify specs/002-edit-applicant-information/
+
+- อ่าน `spec.md`, `plan.md`, `tasks.md`, `test-cases.md`, `rtm.md`, `AGENTS.md`, implementation ทั้งหมดใน `backend/app/` และ `frontend/src/` รวมถึง tests ใน `backend/tests/` และ `frontend/src/__tests__/`
+- ผล test: backend ผ่าน 26 tests, ไม่ผ่าน 0 tests; frontend `npm test -- --run` ผ่าน 3 tests จาก 3 test files, ไม่ผ่าน 0 tests
+- จำนวนแถวตามรอยไปข้างหน้า: ครบ 4, ยังไม่ถึง 0, รอ Q-xx 0, ช่องโหว่ 8
+- ข้อค้นพบเดิมที่ยังพบ: F-01, F-02, F-05, F-06, F-08, F-09, F-10
+- ข้อค้นพบเดิมที่แก้แล้ว: F-07 เพราะเพิ่ม Vitest และ `test` script แล้ว; frontend tests ที่มีอยู่ยังเป็นของ scheduling ไม่ใช่ Applicant Edit
+- ข้อค้นพบใหม่: ไม่มี
+- ขอบเขต: แก้เฉพาะ `specs/002-edit-applicant-information/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks
+
+---
+
+## 2026-11-09 16:06 คำสั่ง: เพิ่ม Test ของ Applicant Edit tests และแก้ไขช่องโหว่ใน rtm.md
+
+- เพิ่ม `frontend/src/__tests__/ApplicantEdit.test.jsx` ครอบคลุม save, validation/error highlight, คงค่า และ cancel สำหรับ `TC-REG-01-1`, `TC-REG-02-1`, `TC-REG-03-1`, `TC-REG-03-2`
+- เพิ่ม backend tests `TC-REG-03-1` และ `TC-REG-03-2` ใน `backend/tests/test_AC_REG_03.py`
+- เพิ่ม test สิทธิ์ role ต้องห้ามสำหรับ `cancel-edit` ใน `backend/tests/test_applicant_permissions.py`
+- ผล test: backend ผ่าน 29 tests, ไม่ผ่าน 0 tests; frontend ผ่าน 7 tests จาก 4 test files, ไม่ผ่าน 0 tests
+- ผล build: `cd frontend && npm run build` ผ่าน
+- RTM: ย้าย F-05, F-06, F-08 และ F-09 ไปหัวข้อ `แก้แล้ว`; คง F-01, F-02 และ F-10 ไว้ให้ทีมตัดสิน
+
+---
+
+## 2026-11-09 18:53 คำสั่ง: /verify spec/002-edit-applicant-information
+
+- อ่าน `spec.md`, `plan.md`, `tasks.md`, `test-cases.md`, `rtm.md`, `AGENTS.md`, โค้ดทั้งหมดใน `backend/app/` และ `frontend/src/` รวมถึง test ทั้งหมด
+- ผล `cd backend && pytest -v`: เก็บ test ไม่ได้ 10 errors เพราะ `ModuleNotFoundError: No module named 'backend'` จาก import path
+- ผล `cd backend && PYTHONPATH=.. pytest -v`: backend ผ่าน 31 tests, ไม่ผ่าน 0 tests
+- ผล `cd frontend && npm test`: frontend ผ่าน 7 tests จาก 4 test files, ไม่ผ่าน 0 tests
+- จำนวนแถวตามรอยไปข้างหน้า: ครบ 9, ยังไม่ถึง 0, รอ Q-xx 0, ช่องโหว่ 3
+- ข้อค้นพบใหม่: F-11 AC ไม่มี test สำหรับ TC-REG-03-3; F-12 โค้ดไม่มี FR เรื่องค้นหาผู้สมัคร; F-13 ไม่บังคับ ASM-04 เมื่อการลงทะเบียนเสร็จสิ้น; F-14 ไม่มี retention ของ Audit Log; F-15 test อ่อนสำหรับการแสดงข้อมูลเดิมครบทุกฟิลด์
 - ขอบเขต: แก้เฉพาะ `specs/002-edit-applicant-information/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks

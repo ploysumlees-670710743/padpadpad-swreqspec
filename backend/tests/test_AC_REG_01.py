@@ -53,7 +53,15 @@ def test_AC_REG_01_save_edit_and_create_audit_log(tmp_path: Path) -> None:
 
     original = client.get("/applicants/app-001/edit")
     assert original.status_code == 200
-    assert original.json()["phone_number"] == "0811111111"
+    assert original.json() == {
+        "applicant_id": "app-001",
+        "full_name": "ผู้สมัครตัวอย่าง",
+        "phone_number": "0811111111",
+        "email": "applicant@example.test",
+        "address": "ที่อยู่เดิม",
+        "status": "pending",
+        "updated_at": None,
+    }
 
     response = client.put(
         "/applicants/app-001",
@@ -69,6 +77,73 @@ def test_AC_REG_01_save_edit_and_create_audit_log(tmp_path: Path) -> None:
     assert body["audit_log"][0]["old_value"] == "0811111111"
     assert body["audit_log"][0]["new_value"] == "0822222222"
     assert "+07:00" in body["audit_log"][0]["edited_at"]
+    assert "+07:00" in body["audit_log"][0]["retention_until"]
+
+    audit_response = client.get("/applicants/app-001/audit-log")
+    assert audit_response.status_code == 200
+    assert audit_response.json()["audit_log"] == body["audit_log"]
+
+
+def test_get_edit_for_missing_applicant_returns_not_found(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    response = client.get("/applicants/missing-applicant/edit")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Applicant not found"
+
+
+def test_get_audit_log_returns_all_changes(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    update = client.put(
+        "/applicants/app-001",
+        json={"phone_number": "0822222222", "address": "ที่อยู่ใหม่"},
+    )
+    assert update.status_code == 200
+
+    response = client.get("/applicants/app-001/audit-log")
+
+    assert response.status_code == 200
+    audit_log = response.json()["audit_log"]
+    assert len(audit_log) == 2
+    assert {entry["field_name"] for entry in audit_log} == {"phone_number", "address"}
+    assert {entry["old_value"] for entry in audit_log} == {"0811111111", "ที่อยู่เดิม"}
+    assert {entry["new_value"] for entry in audit_log} == {"0822222222", "ที่อยู่ใหม่"}
+
+
+def test_search_applicants_by_id_or_name(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    by_id = client.get("/applicants/search", params={"query": "app-001"})
+    by_name = client.get("/applicants/search", params={"query": "ผู้สมัคร"})
+
+    assert by_id.status_code == 200
+    assert [item["applicant_id"] for item in by_id.json()["applicants"]] == ["app-001"]
+    assert by_name.status_code == 200
+    assert [item["applicant_id"] for item in by_name.json()["applicants"]] == ["app-001"]
+
+
+def test_update_rejects_completed_registration(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+    with sqlite3.connect(tmp_path / "applicant.sqlite3") as connection:
+        connection.execute(
+            "UPDATE applicants SET status = 'completed' WHERE applicant_id = ?",
+            ("app-001",),
+        )
+
+    response = client.put(
+        "/applicants/app-001",
+        json={"phone_number": "0822222222"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"]["errors"]["status"]
+    with sqlite3.connect(tmp_path / "applicant.sqlite3") as connection:
+        assert connection.execute(
+            "SELECT phone_number FROM applicants WHERE applicant_id = ?",
+            ("app-001",),
+        ).fetchone()[0] == "0811111111"
 
 
 def test_transaction_rolls_back_applicant_when_audit_insert_fails(tmp_path: Path) -> None:

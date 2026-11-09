@@ -94,7 +94,8 @@ CREATE TABLE IF NOT EXISTS applicant_audit_logs (
     field_name TEXT NOT NULL,
     old_value TEXT NOT NULL,
     new_value TEXT NOT NULL,
-    change_summary TEXT NOT NULL
+    change_summary TEXT NOT NULL,
+    retention_until TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_applicant_audit_logs_applicant_id
