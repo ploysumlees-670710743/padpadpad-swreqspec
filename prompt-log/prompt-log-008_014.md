@@ -373,3 +373,4 @@
   - `README.md`
   - `prompt-log/prompt-log-008_014.md`
 - เนื้อหา: ขั้นตอนติดตั้ง dependencies, เปิด backend/frontend, ทดลอง flow ตาม AC-VOT-01/02 และรัน backend/frontend tests; ระบุชัดว่า vote state บนหน้าเว็บเป็น in-memory, role เป็น mock และยังไม่มี central authentication/การบันทึกคะแนนถาวร
+- ปรับเพิ่ม: ระบุวิธีปิด Backend และ Frontend โดยกด `Ctrl+C` ในแต่ละ terminal
