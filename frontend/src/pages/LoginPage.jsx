@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 
-// รองรับ: FR-LOG-01, FR-LOG-02, FR-LOG-06, AC-LOG-01, AC-LOG-02
+// รองรับ: FR-LOG-01, FR-LOG-02, FR-LOG-06, FR-LOG-07, AC-LOG-01, AC-LOG-02, AC-LOG-03
 export default function LoginPage({ client, onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // รองรับ: FR-LOG-02, FR-LOG-06, AC-LOG-01, AC-LOG-02
+  // รองรับ: FR-LOG-02, FR-LOG-06, FR-LOG-07, AC-LOG-01, AC-LOG-02, AC-LOG-03
   async function handleSubmit(event) {
     event.preventDefault();
     setErrorMessage('');
@@ -20,6 +20,8 @@ export default function LoginPage({ client, onLoginSuccess }) {
       setErrorMessage(
         error.status === 401
           ? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+          : error.status === 403
+            ? 'บัญชีของคุณไม่มีสิทธิ์เข้าใช้งานระบบ'
           : error.message,
       );
     } finally {
