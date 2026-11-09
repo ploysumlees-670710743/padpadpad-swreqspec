@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 
-// รองรับ: FR-LOG-01, FR-LOG-02, AC-LOG-01
+// รองรับ: FR-LOG-01, FR-LOG-02, FR-LOG-06, AC-LOG-01, AC-LOG-02
 export default function LoginPage({ client, onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // รองรับ: FR-LOG-02, AC-LOG-01
+  // รองรับ: FR-LOG-02, FR-LOG-06, AC-LOG-01, AC-LOG-02
   async function handleSubmit(event) {
     event.preventDefault();
     setErrorMessage('');
@@ -17,7 +17,11 @@ export default function LoginPage({ client, onLoginSuccess }) {
       const response = await client.login(username, password);
       onLoginSuccess(await response.json());
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        error.status === 401
+          ? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+          : error.message,
+      );
     } finally {
       setIsSubmitting(false);
     }
