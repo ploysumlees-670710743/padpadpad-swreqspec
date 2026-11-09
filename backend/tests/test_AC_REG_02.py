@@ -100,3 +100,88 @@ def test_AC_REG_02_invalid_phone_has_field_error_without_success_state() -> None
     )
 
     assert response.status_code == 403
+
+
+# Given: คณะกรรมการอยู่ในหน้าแก้ไขข้อมูล;
+# When: กรอกเบอร์โทรศัพท์ไม่ครบ 10 หลักแล้วกด "ยืนยัน";
+# Then: ระบบแจ้งเตือนให้แก้ไข; ไม่บันทึกข้อมูลลงฐานข้อมูล;
+# ไม่มีการสร้างประวัติการแก้ไข
+# ส่วนเน้นช่องและคงค่าที่กรอกไว้เป็นพฤติกรรมหน้าจอ รอ vitest
+def test_TC_REG_02_1_reject_short_phone_and_keep_input(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    validation = client.post(
+        "/applicants/app-002/validate",
+        json={"phone_number": "08123"},
+    )
+    response = client.put(
+        "/applicants/app-002",
+        json={"phone_number": "08123"},
+    )
+
+    assert validation.json()["valid"] is False
+    assert validation.json()["errors"]["phone_number"]
+    assert response.status_code == 422
+    with sqlite3.connect(tmp_path / "applicant.sqlite3") as connection:
+        applicant = connection.execute(
+            "SELECT phone_number FROM applicants WHERE applicant_id = ?",
+            ("app-002",),
+        ).fetchone()
+        audit_count = connection.execute(
+            "SELECT COUNT(*) FROM applicant_audit_logs WHERE applicant_id = ?",
+            ("app-002",),
+        ).fetchone()[0]
+    assert applicant[0] == "0811111111"
+    assert audit_count == 0
+
+
+# Given: คณะกรรมการอยู่ในหน้าแก้ไขข้อมูล;
+# When: กรอกเบอร์โทรศัพท์ที่มีตัวเลขครบ 10 หลัก แล้วกด "ยืนยัน";
+# Then: ระบบไม่แจ้งข้อผิดพลาดจากเงื่อนไขจำนวนหลัก;
+# ผลการบันทึก/ประวัติการแก้ไขเมื่อข้อมูลผ่านเงื่อนไข spec ไม่ได้บอก
+# จึงไม่ตรวจผลการบันทึกหรือ Audit Log
+def test_TC_REG_02_2_accept_ten_digit_phone_boundary(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    response = client.post(
+        "/applicants/app-002/validate",
+        json={"phone_number": "0822222222"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"valid": True, "errors": {}}
+
+
+# Given: คณะกรรมการอยู่ในหน้าแก้ไขข้อมูล แต่กรอกเบอร์โทรศัพท์ที่มีตัวอักษร;
+# When: กดยืนยัน;
+# Then: ระบบแจ้งเตือนให้แก้ไข; ไม่บันทึกข้อมูลลงฐานข้อมูล;
+# ไม่มีการสร้างประวัติการแก้ไข
+# ส่วนเน้นช่องและคงค่าที่กรอกไว้เป็นพฤติกรรมหน้าจอ รอ vitest
+def test_TC_REG_02_3_reject_phone_with_letters_and_keep_input(
+    tmp_path: Path,
+) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    validation = client.post(
+        "/applicants/app-002/validate",
+        json={"phone_number": "08123ABCDE"},
+    )
+    response = client.put(
+        "/applicants/app-002",
+        json={"phone_number": "08123ABCDE"},
+    )
+
+    assert validation.json()["valid"] is False
+    assert validation.json()["errors"]["phone_number"]
+    assert response.status_code == 422
+    with sqlite3.connect(tmp_path / "applicant.sqlite3") as connection:
+        applicant = connection.execute(
+            "SELECT phone_number FROM applicants WHERE applicant_id = ?",
+            ("app-002",),
+        ).fetchone()
+        audit_count = connection.execute(
+            "SELECT COUNT(*) FROM applicant_audit_logs WHERE applicant_id = ?",
+            ("app-002",),
+        ).fetchone()[0]
+    assert applicant[0] == "0811111111"
+    assert audit_count == 0

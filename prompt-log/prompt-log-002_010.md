@@ -263,3 +263,38 @@
 - ข้อค้นพบใหม่: ไม่มี
 - การปรับธีม frontend เป็นการเปลี่ยน presentation ใน `frontend/src/styles/applicant-edit.css`; ไม่พบการเพิ่ม requirement หรือการเปลี่ยน behavior ของฟีเจอร์
 - ขอบเขต: แก้เฉพาะ `specs/002-edit-applicant-information/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks
+
+---
+
+## 2026-11-09 13:11 คำสั่ง: /testcases AC-REG-01 specs/002-edit-applicant-information
+
+- โหมด: เขียน test จากแถวสถานะ `ใช้ได้`
+- TC ID ที่เขียน: `TC-REG-01-1`, `TC-REG-01-2`, `TC-REG-01-3`
+- ไฟล์ test: `backend/tests/test_AC_REG_01.py`
+- ผล test: เพิ่ม test 3 ตัวตามจำนวนแถวที่เลือก; `cd backend && PYTHONPATH=.. pytest -v` ผ่าน 23 tests, ไม่ผ่าน 0 tests
+- จำนวน test ในไฟล์ AC-REG-01: จาก 3 ตัวเดิมเป็น 6 ตัวใหม่
+- ประเด็นที่ไม่ใส่ assert: `TC-REG-01-2` ระบุว่า spec ไม่ได้บอกว่าต้องสร้าง Audit Log เมื่อไม่มีฟิลด์เปลี่ยนแปลง จึงบันทึกไว้เป็นคอมเมนต์ตามกติกา
+
+---
+
+## 2026-11-09 13:14 คำสั่ง: /testcases AC-REG-02 specs/002-edit-applicant-information
+
+- โหมด: เขียน test จากแถวสถานะ `ใช้ได้`
+- TC ID ที่เขียน: `TC-REG-02-1`, `TC-REG-02-2`, `TC-REG-02-3`
+- ไฟล์ test: `backend/tests/test_AC_REG_02.py`
+- ผล test: เพิ่ม test 3 ตัวตามจำนวนแถวที่เลือก; `cd backend && PYTHONPATH=.. pytest -v` ผ่าน 26 tests, ไม่ผ่าน 0 tests
+- จำนวน test ในไฟล์ AC-REG-02: จาก 2 ตัวเดิมเป็น 5 ตัวใหม่
+- ข้อจำกัด: แถวระบุ `pytest + vitest` แต่ frontend ไม่มี script `test` และไม่มี test runner; test ที่เพิ่มตรวจเฉพาะ validation, การไม่บันทึก และการไม่สร้าง Audit Log ฝั่ง backend
+- ประเด็นที่ไม่ใส่ assert: `TC-REG-02-2` ระบุว่าสเปกไม่ได้บอกผลการบันทึกหรือ Audit Log เมื่อเบอร์ 10 หลักผ่าน validation จึงตรวจเฉพาะผล validation
+
+---
+
+## 2026-11-09 13:34 คำสั่ง: /verify specs/002-edit-applicant-information/
+
+- อ่าน `spec.md`, `plan.md`, `tasks.md`, `test-cases.md`, `rtm.md`, `AGENTS.md`, implementation ทั้งหมดใน `backend/app/` และ `frontend/src/` รวมถึง tests ใน `backend/tests/` และ `frontend/src/__tests__/`
+- ผล test: backend ผ่าน 26 tests, ไม่ผ่าน 0 tests; `cd frontend && npm test` รันไม่ได้เพราะ `frontend/package.json` ไม่มี script `test`
+- จำนวนแถวตามรอยไปข้างหน้า: ครบ 4, ยังไม่ถึง 0, รอ Q-xx 0, ช่องโหว่ 8
+- ข้อค้นพบเดิมที่ยังพบ: F-01, F-02, F-05, F-06, F-07, F-08, F-09, F-10
+- ข้อค้นพบใหม่: ไม่มี
+- การปรับปรุงจากรอบก่อน: F-05 ระบุว่าการตรวจสิทธิ์ PUT มีแล้วแต่ cancel ยังไม่มี; F-08 เหลือเฉพาะ TC-REG-03-1 และ TC-REG-03-2 เพราะ AC-REG-01 และ AC-REG-02 มี test ตามแถวแล้ว
+- ขอบเขต: แก้เฉพาะ `specs/002-edit-applicant-information/rtm.md` และเพิ่มบันทึกนี้; ไม่แก้โค้ด, test, spec, plan หรือ tasks

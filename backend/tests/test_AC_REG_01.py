@@ -137,3 +137,102 @@ def test_AC_REG_01_save_with_audit_log_average_response_under_1_5_seconds(
         assert response.status_code == 200
 
     assert sum(durations) / len(durations) <= 1.5
+
+
+# Given: คณะกรรมการเปิดหน้าข้อมูลผู้สมัครที่มีเบอร์โทรศัพท์เดิม;
+# When: แก้ไขเบอร์โทรศัพท์ติดต่อเป็นเบอร์ใหม่ แล้วกด "ยืนยัน";
+# Then: ระบบบันทึกข้อมูลใหม่; สร้างประวัติการเปลี่ยนแปลง;
+# ระบุผู้แก้ไข วันเวลา ฟิลด์ เบอร์เดิม และเบอร์ใหม่
+def test_TC_REG_01_1_save_phone_and_create_audit_log(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    response = client.put(
+        "/applicants/app-001",
+        json={"phone_number": "0822222222"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["applicant"]["phone_number"] == "0822222222"
+    assert len(body["audit_log"]) == 1
+    audit = body["audit_log"][0]
+    assert audit["editor_user_id"] == "committee-1"
+    assert audit["edited_at"].endswith("+07:00")
+    assert audit["field_name"] == "phone_number"
+    assert audit["old_value"] == "0811111111"
+    assert audit["new_value"] == "0822222222"
+
+
+# Given: คณะกรรมการเปิดหน้าข้อมูลผู้สมัครที่มีเบอร์โทรศัพท์เดิม;
+# When: กดยืนยันโดยส่งเบอร์โทรศัพท์เดิมซ้ำ ไม่ได้เปลี่ยนค่า;
+# Then: ระบบบันทึกเฉพาะฟิลด์ที่เปลี่ยนแปลงเท่านั้นตาม ASM-06
+# ส่วนการสร้างประวัติเมื่อไม่มีฟิลด์เปลี่ยนแปลง spec ไม่ได้บอก จึงไม่ตรวจส่วนนั้น
+def test_TC_REG_01_2_ignore_unchanged_phone(tmp_path: Path) -> None:
+    client = _client(tmp_path / "applicant.sqlite3")
+
+    response = client.put(
+        "/applicants/app-001",
+        json={"phone_number": "0811111111"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["applicant"]["phone_number"] == "0811111111"
+
+
+# Given: ผู้ใช้งานไม่มีบทบาท "คณะกรรมการ" หรือ "ผู้ดูแลระบบ" เปิดหน้าข้อมูลผู้สมัคร;
+# When: พยายามแก้ไขเบอร์โทรศัพท์และกด "ยืนยัน";
+# Then: ระบบป้องกันไม่ให้ผู้ใช้ที่ไม่มีสิทธิ์เข้าถึงและแก้ไขข้อมูลตาม SEC-RBAC-01;
+# ระบบไม่บันทึกข้อมูลใหม่และไม่สร้างประวัติการเปลี่ยนแปลง
+def test_TC_REG_01_3_reject_unauthorized_editor(tmp_path: Path) -> None:
+    database_path = tmp_path / "applicant.sqlite3"
+    service = ApplicantService(database_path)
+    service.initialize()
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            """
+            INSERT INTO applicants (
+                applicant_id, full_name, phone_number, email, address,
+                status, registration_timestamp
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "app-unauthorized",
+                "ผู้สมัครตัวอย่าง",
+                "0811111111",
+                "applicant@example.test",
+                "ที่อยู่เดิม",
+                "pending",
+                "2026-11-09T09:00:00+07:00",
+            ),
+        )
+
+    app = FastAPI()
+
+    async def attach_unauthorized_editor(request, call_next):
+        request.state.user = UserAccount("staff-1", "staff", "เจ้าหน้าที่")
+        return await call_next(request)
+
+    app.middleware("http")(attach_unauthorized_editor)
+    app.dependency_overrides[get_applicant_service] = lambda: service
+    app.include_router(router)
+    client = TestClient(app)
+
+    edit_response = client.get("/applicants/app-unauthorized/edit")
+    update_response = client.put(
+        "/applicants/app-unauthorized",
+        json={"phone_number": "0822222222"},
+    )
+
+    assert edit_response.status_code == 403
+    assert update_response.status_code == 403
+    with sqlite3.connect(database_path) as connection:
+        phone_number = connection.execute(
+            "SELECT phone_number FROM applicants WHERE applicant_id = ?",
+            ("app-unauthorized",),
+        ).fetchone()[0]
+        audit_count = connection.execute(
+            "SELECT COUNT(*) FROM applicant_audit_logs WHERE applicant_id = ?",
+            ("app-unauthorized",),
+        ).fetchone()[0]
+    assert phone_number == "0811111111"
+    assert audit_count == 0
