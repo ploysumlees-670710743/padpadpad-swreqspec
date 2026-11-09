@@ -37,7 +37,7 @@ def get_authentication_connection() -> Generator[Connection, None, None]:
         yield connection
 
 
-# รองรับ: FR-LOG-02, FR-LOG-03, FR-LOG-04, FR-LOG-05, AC-LOG-01
+# รองรับ: FR-LOG-02, FR-LOG-03, FR-LOG-04, FR-LOG-05, FR-LOG-06, AC-LOG-01, AC-LOG-02
 @router.post("/login")
 def login(
     payload: LoginRequest,
