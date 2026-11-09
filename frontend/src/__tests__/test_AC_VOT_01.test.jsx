@@ -68,16 +68,22 @@ describe("AC-VOT-01", () => {
       root.render(<VoteLocationPage />);
     });
 
-    expect(container.textContent).toContain("ต้นแบบเพื่อสาธิต — ข้อมูลจำลอง ไม่บันทึกลงระบบจริง");
+    expect(container.textContent).toContain("ต้นแบบเพื่อสาธิต");
+    expect(container.textContent).toContain("ข้อมูลจำลอง ไม่บันทึกลงระบบจริง");
+    expect(container.textContent).toContain("สถานะ: รอเลือกสถานที่");
     expect(container.textContent).toContain("ศูนย์เรียนรู้ชุมชน");
     expect(container.textContent).toContain("ตัวอย่าง: มีพื้นที่ทำกิจกรรมและพื้นที่พักผ่อน");
-    expect(container.textContent).toContain("คะแนนรวม: 3");
+    expect(container.querySelector("output").textContent).toBe("3");
     expect(container.querySelector("img").getAttribute("src")).toContain("data:image/svg+xml");
+    expect(container.querySelector("img").className).toContain("object-cover");
+    expect(container.querySelector("fieldset").textContent).toContain("เลือกสถานที่ 1 แห่ง");
 
     const radio = container.querySelector('input[type="radio"]');
     await act(async () => {
       radio.click();
     });
+    expect(container.textContent).toContain("สถานะ: พร้อมยืนยัน");
+    expect(container.querySelector('[aria-label="เลือกสถานที่นี้แล้ว"]')).not.toBeNull();
     const confirmButton = [...container.querySelectorAll("button")].find((button) =>
       button.textContent.includes("ยืนยันการลงคะแนน"),
     );
@@ -85,7 +91,8 @@ describe("AC-VOT-01", () => {
       confirmButton.click();
     });
 
-    expect(container.textContent).toContain("คะแนนรวม: 4");
+    expect(container.querySelector("output").textContent).toBe("4");
+    expect(container.textContent).toContain("สถานะ: ใช้สิทธิ์แล้ว");
     expect(container.textContent).toContain("ท่านได้ใช้สิทธิ์ไปแล้ว");
     expect(container.querySelector('input[type="radio"]').disabled).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -189,6 +196,6 @@ describe("AC-VOT-01", () => {
     expect(tieNotice.textContent).toContain("สถานที่สอง");
     expect(tieNotice.textContent).toContain("คณะกรรมการโปรดพิจารณาตัดสินใจต่อ");
     expect(tieNotice.textContent).toContain("ระบบจะไม่เลือกผู้ชนะ");
-    expect(container.querySelectorAll(".vote-location-card")).toHaveLength(2);
+    expect(container.querySelectorAll("article")).toHaveLength(2);
   });
 });

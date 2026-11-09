@@ -347,3 +347,29 @@
 - ข้อค้นพบเดิมที่ยังพบ: F-01, F-02; ข้อค้นพบใหม่: F-03 ถึง F-07
 - ข้อค้นพบใหม่โดยย่อ: F-03 API ไม่ตรวจ location ที่ได้รับอนุมัติ; F-04 การโหวต frontend เป็น in-memory ไม่เรียก POST/ไม่ real-time และไม่คงสถานะหลัง reload; F-05 ไม่มี central auth integration และ role หน้าเว็บ hardcode; F-06 ไม่มี concurrent-submission test; F-07 ไม่มี usability evaluation
 - บันทึกผลใน `specs/008-vote-location/rtm.md`; ไม่แก้ source code, test, spec, plan หรือ tasks
+
+## 2026-11-09 ปรับหน้า UC-08 เป็น Eco/Nature UI
+
+- คำขอ: ปรับหน้าโหวตให้เป็น UI สมัยใหม่โทนธรรมชาติ มี badge ต้นแบบ, สถานะ/ความคืบหน้า, responsive 3-column cards, ตัวบ่งชี้สถานที่ที่เลือก, ภาพ 16:9, badge คะแนน และปุ่มยืนยันแบบ gradient
+- คำตอบทีม: เลือกติดตั้ง Tailwind CSS และอนุญาตให้แก้ `frontend/package.json`, lockfile, `vite.config.js`, JSX/CSS, tests ที่เกี่ยวข้อง และ `specs/008-vote-location/plan.md`
+- การตัดสินใจ: ใช้ Tailwind เป็นเครื่องมือจัดสไตล์ที่ทีมเลือกเอง ไม่ได้มาจาก spec; ตัวบ่งชี้ความคืบหน้าแสดงเฉพาะสถานะเดิมของการเลือก/ยืนยัน ไม่เพิ่มขั้นตอนหรือเปลี่ยน workflow
+- ไฟล์ที่แก้:
+  - `frontend/package.json` และ `frontend/package-lock.json`
+  - `frontend/vite.config.js`
+  - `frontend/src/pages/VoteLocationPage.jsx`
+  - `frontend/src/pages/VoteLocationPage.css`
+  - `frontend/src/__tests__/test_AC_VOT_01.test.jsx`
+  - `frontend/src/__tests__/test_AC_VOT_02.test.jsx`
+  - `specs/008-vote-location/plan.md`
+  - `prompt-log/prompt-log-008_014.md`
+- ผลตรวจ: `npm --prefix frontend test` — 9 passed ใน 6 test files; `npm --prefix frontend run build` — ผ่าน; `git diff --check` — ผ่าน
+- หมายเหตุจากการติดตั้ง: npm แจ้ง audit findings 6 รายการ (3 moderate, 1 high, 2 critical); ยังไม่ได้รันคำสั่งแก้ audit อัตโนมัติ
+
+## 2026-11-09 เพิ่มคู่มือทดลอง Prototype UC-08
+
+- คำขอ: ทำให้เพื่อนร่วมทีมและอาจารย์ทราบวิธีเปิด ทดลอง และตรวจหน้าเว็บ prototype
+- ไฟล์ที่แก้:
+  - `specs/008-vote-location/README.md`
+  - `README.md`
+  - `prompt-log/prompt-log-008_014.md`
+- เนื้อหา: ขั้นตอนติดตั้ง dependencies, เปิด backend/frontend, ทดลอง flow ตาม AC-VOT-01/02 และรัน backend/frontend tests; ระบุชัดว่า vote state บนหน้าเว็บเป็น in-memory, role เป็น mock และยังไม่มี central authentication/การบันทึกคะแนนถาวร

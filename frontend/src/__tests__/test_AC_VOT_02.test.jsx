@@ -68,7 +68,7 @@ describe("AC-VOT-02", () => {
     expect(container.textContent).toContain("ท่านได้ใช้สิทธิ์ไปแล้ว");
     expect(confirmButton.disabled).toBe(true);
     expect(firstOption.disabled).toBe(true);
-    expect(container.textContent).toContain("คะแนนรวม: 4");
+    expect(container.querySelector("output").textContent).toBe("4");
 
     await act(async () => {
       container.querySelector("form").dispatchEvent(
@@ -76,7 +76,7 @@ describe("AC-VOT-02", () => {
       );
     });
 
-    expect(container.textContent).toContain("คะแนนรวม: 4");
+    expect(container.querySelector("output").textContent).toBe("4");
     expect(container.textContent).toContain("ท่านได้ใช้สิทธิ์ไปแล้ว");
     expect(castVote).toHaveBeenCalledTimes(1);
   });

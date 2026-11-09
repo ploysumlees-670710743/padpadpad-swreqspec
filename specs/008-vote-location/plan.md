@@ -11,7 +11,7 @@ Feature นี้ต้องรองรับการลงคะแนนส
 5. จัดทำ traceability / acceptance test mapping ให้ครอบคลุม FR และ AC ใน spec
 
 ## แนวทาง Backend และ Frontend
-- เทคโนโลยีที่เสนอจากรูปแบบใน repo: Python/FastAPI, SQLite/SQL, React (Vite)/JSX และ pytest; ทีมเลือกเอง ไม่ได้มาจาก spec และ spec ไม่ได้บังคับภาษา/framework เหล่านี้
+- เทคโนโลยีที่เสนอจากรูปแบบใน repo: Python/FastAPI, SQLite/SQL, React (Vite)/JSX และ pytest; ทีมเลือกเอง ไม่ได้มาจาก spec และ spec ไม่ได้บังคับภาษา/framework เหล่านี้. สำหรับการปรับหน้าต้นแบบครั้งนี้ ทีมเลือก Tailwind CSS เป็นเครื่องมือจัดสไตล์; ไม่ได้มาจาก spec
 - Backend: เพิ่ม model และ schema แยกข้อมูลการใช้สิทธิ์ออกจากคะแนนที่ลงเพื่อไม่ให้เชื่อมโยงผู้ลงคะแนนกับสถานที่; ใช้ transaction และ unique constraint ตาม CON-TECH-01, CON-DATA-01 และ ASM-04
 - Backend API: เพิ่ม API สำหรับรายการสถานที่ที่เข้าเกณฑ์และการส่ง/อ่านผลคะแนน โดยตรวจ Role และสถานะระบบยืนยันตัวตนตาม FR-VOT-02, CON-SEC-01; การส่งซ้ำต้องตอบ HTTP 409 และผู้ไม่มีสิทธิ์ต้องตอบ HTTP 403
 - Frontend: เพิ่มหน้าโหวตและส่วนสรุปคะแนน เรียก API ผ่าน `frontend/src/api/client.js`; ซ่อนปุ่มสำหรับผู้ไม่มีสิทธิ์และปิดปุ่มยืนยันหลังส่ง ตาม AC-VOT-02 และ AC-VOT-03
