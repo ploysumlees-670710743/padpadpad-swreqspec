@@ -1,8 +1,9 @@
 """Voting API for UC-08."""
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
+from backend.app.middleware.authz import get_authenticated_voter_id
 from backend.app.services.vote_service import (
     AlreadyVotedError,
     IneligibleVoterError,
@@ -26,22 +27,38 @@ class VoteResponse(BaseModel):
     has_voted: bool
 
 
-def get_authenticated_voter_id(request: Request) -> str:
-    """Read identity from trusted authentication middleware and fail closed (CON-SEC-01)."""
+class VoteLocationResponse(BaseModel):
+    """Describe one prototype location and its displayed result (FR-VOT-01, FR-VOT-05)."""
 
-    user_id = getattr(request.state, "user_id", None)
-    if not isinstance(user_id, str) or not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="ระบบยืนยันตัวตนขัดข้อง",
-        )
-    return user_id
+    location_id: str
+    name: str
+    image_url: str
+    survey_summary: str
+    total_votes: int
+
+
+class VoteLocationsResponse(BaseModel):
+    """Return prototype locations and the requested round (FR-VOT-01, FR-VOT-05)."""
+
+    round_id: str
+    has_voted: bool
+    locations: list[VoteLocationResponse]
 
 
 def get_vote_service() -> VoteService:
     """Provide the voting service (CON-TECH-01)."""
 
     return VoteService()
+
+
+@router.get("/locations", response_model=VoteLocationsResponse)
+def get_vote_locations(
+    round_id: str = Query(min_length=1),
+    service: VoteService = Depends(get_vote_service),
+) -> VoteLocationsResponse:
+    """List team-approved mock locations and displayed totals (FR-VOT-01, FR-VOT-05)."""
+
+    return VoteLocationsResponse(**service.get_vote_locations(round_id))
 
 
 @router.post("", response_model=VoteResponse)

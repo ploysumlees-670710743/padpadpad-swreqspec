@@ -1,84 +1,23 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
-async function readJson(response, action) {
+const demoRounds = new Map();
+const demoVoterRole = "lecturer";
+
+async function readJsonResponse(response, requestName) {
   let body;
   try {
     body = await response.json();
   } catch (error) {
-    throw new Error(`${action} returned invalid JSON (${response.status})`, {
+    throw new Error(`${requestName} API returned invalid JSON (${response.status})`, {
       cause: error,
     });
   }
 
   if (!response.ok) {
-    const detail = body.detail;
-    const message = typeof detail === "string" ? detail : `${action} failed (${response.status})`;
-    const error = new Error(message);
-    if (detail && typeof detail === "object" && detail.errors) {
-      error.fieldErrors = detail.errors;
-    }
-    throw error;
+    throw new Error(body.detail || `${requestName} request failed (${response.status})`);
   }
 
   return body;
-}
-
-// Reads an applicant's existing editable details (FR-REG-01).
-export async function getApplicantForEdit(applicantId) {
-  const response = await fetch(`${API_BASE_URL}/applicants/${encodeURIComponent(applicantId)}/edit`, {
-    credentials: "include",
-  });
-  return readJson(response, "Applicant edit request");
-}
-
-// Searches applicants by ID or full name (FR-REG-01).
-export async function searchApplicants(query) {
-  const response = await fetch(
-    `${API_BASE_URL}/applicants/search?query=${encodeURIComponent(query)}`,
-    { credentials: "include" },
-  );
-  return readJson(response, "Applicant search request");
-}
-
-// Saves edited applicant details and receives the audit result (FR-REG-04, FR-REG-05).
-export async function updateApplicant(applicantId, changes) {
-  const response = await fetch(`${API_BASE_URL}/applicants/${encodeURIComponent(applicantId)}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(changes),
-  });
-  return readJson(response, "Applicant update request");
-}
-
-// Validates edited applicant details before saving (FR-REG-02, FR-REG-03).
-export async function validateApplicant(applicantId, changes) {
-  const response = await fetch(
-    `${API_BASE_URL}/applicants/${encodeURIComponent(applicantId)}/validate`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(changes),
-    },
-  );
-  return readJson(response, "Applicant validation request");
-}
-
-// Cancels editing and returns the original applicant (FR-REG-06).
-export async function cancelApplicantEdit(applicantId) {
-  const response = await fetch(
-    `${API_BASE_URL}/applicants/${encodeURIComponent(applicantId)}/cancel-edit`,
-    {
-      method: "POST",
-      credentials: "include",
-    },
-  );
-  return readJson(response, "Applicant cancel edit request");
 }
 
 // Reads the authenticated student's application summaries (FR-STA-01).
@@ -87,18 +26,59 @@ export async function getMyApplication() {
     credentials: "include",
   });
 
-  let body;
-  try {
-    body = await response.json();
-  } catch (error) {
-    throw new Error(`Application status API returned invalid JSON (${response.status})`, {
-      cause: error,
+  return readJsonResponse(response, "Application status");
+}
+
+function getDemoRound(roundId) {
+  if (!demoRounds.has(roundId)) {
+    demoRounds.set(roundId, {
+      locations: [],
+      hasVoted: false,
     });
   }
+  return demoRounds.get(roundId);
+}
 
-  if (!response.ok) {
-    throw new Error(body.detail || `Application status request failed (${response.status})`);
+// Returns the simulated voter's role for the prototype (FR-VOT-02).
+export async function getVoteAccess() {
+  return { role: demoVoterRole };
+}
+
+// Reads prototype locations from the mock API source (FR-VOT-01, FR-VOT-05).
+export async function getVoteLocations(roundId) {
+  const query = new URLSearchParams({ round_id: roundId });
+  const response = await fetch(`${API_BASE_URL}/api/votes/locations?${query}`, {
+    credentials: "include",
+  });
+  const result = await readJsonResponse(response, "Vote locations");
+  const round = getDemoRound(roundId);
+  round.locations = result.locations.map((location) => ({ ...location }));
+
+  return {
+    ...result,
+    has_voted: round.hasVoted || result.has_voted,
+    locations: round.locations.map((location) => ({ ...location })),
+  };
+}
+
+// Simulates confirming one location selection and increments its total (FR-VOT-03, FR-VOT-05).
+export async function castVote(roundId, locationId) {
+  const round = getDemoRound(roundId);
+  if (round.hasVoted) {
+    throw new Error("ท่านได้ใช้สิทธิ์ไปแล้ว");
   }
 
-  return body;
+  const location = round.locations.find((item) => item.location_id === locationId);
+  if (!location) {
+    throw new Error("ไม่พบสถานที่ที่เลือก");
+  }
+
+  location.total_votes += 1;
+  round.hasVoted = true;
+  return { total_votes: location.total_votes, has_voted: true };
+}
+
+// Resets in-memory prototype state between acceptance-test scenarios.
+export function resetVoteDemo() {
+  demoRounds.clear();
 }

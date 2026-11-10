@@ -1,8 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import ApplicantEditPage from "./pages/ApplicantEditPage.jsx";
-import ApplicantSearchPage from "./pages/ApplicantSearchPage.jsx";
-import ApplicationStatusPage from "./pages/ApplicationStatusPage.jsx";
+import VoteLocationPage from "./pages/VoteLocationPage.jsx";
 
 function renderPage() {
   const match = window.location.pathname.match(/^\/applicants\/([^/]+)\/edit\/?$/);
@@ -17,6 +15,6 @@ function renderPage() {
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    {renderPage()}
+    <VoteLocationPage />
   </React.StrictMode>,
 );
