@@ -1,97 +1,96 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+
+import App from './App.jsx';
+import './styles.css';
+
+
 import VoteLocationPage from './pages/VoteLocationPage.jsx';
 import CommunityLocationPage from './pages/CommunityLocationPage.jsx';
 import ProjectApprovalPage from './pages/ProjectApprovalPage.jsx';
-import {
-  createCommunityPrototypeClient, createProjectApprovalPrototypeClient,
-} from './api/ucPrototypeClients.js';
+import ApplicationStatusPage from './pages/ApplicationStatusPage.jsx';
+import ScheduleManagementPage from './pages/ScheduleManagementPage.jsx';
+import ApplicantSearchPage from './pages/ApplicantSearchPage.jsx';
+import ApplicantEditPage from './pages/ApplicantEditPage.jsx';
+
 import './ucPrototype.css';
 
-const feature = new URLSearchParams(window.location.search).get('feature');
-const isDemo = import.meta.env.VITE_DEMO_MODE === 'true';
-const communityDemo = createCommunityPrototypeClient();
-const projectDemo = createProjectApprovalPrototypeClient();
-
-// UC-01 / UC-07 only: use the existing entrypoint without changing other features' routes.
-// VITE_DEMO_MODE runs an explicitly labeled, no-network prototype; normal mode uses real API.
-function FeatureEntry() {
-  if (feature === 'community-location' || feature === 'project-approval') {
-    return (
-      <>
-        <nav className="uc-topbar" aria-label="หน้าต้นแบบฟีเจอร์">
-          <a className="uc-brand" href="/?feature=community-location">
-            <span className="uc-logo">ค</span> Camp Project
-          </a>
-          <div className="uc-links">
-            <a className={feature === 'community-location' ? 'active' : ''} href="/?feature=community-location">UC-01 ชุมชน</a>
-            <a className={feature === 'project-approval' ? 'active' : ''} href="/?feature=project-approval">UC-07 อนุมัติ</a>
-          </div>
-        </nav>
-        {isDemo && (
-          <aside className="uc-demo-banner" role="note">
-            <strong>PROTOTYPE / DEMO MODE</strong>
-            <span>ข้อมูลจำลองในหน้านี้เท่านั้น • ยังไม่ได้เชื่อม Login หรือบันทึกลงฐานข้อมูลจริง</span>
-          </aside>
-        )}
-        {feature === 'community-location'
-          ? <CommunityLocationPage demo={isDemo} client={isDemo ? communityDemo : undefined} />
-          : <ProjectApprovalPage demo={isDemo} client={isDemo ? projectDemo : undefined} />}
-        <footer className="uc-footer">Software Requirements Specification • UC-01 / UC-07 • Prototype</footer>
-      </>
-    );
-  }
-  return <VoteLocationPage />;
-}
-
-createRoot(document.getElementById('root')).render(
-  <React.StrictMode><FeatureEntry /></React.StrictMode>,
-);
-import React, { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App.jsx";
-import ApplicationStatusPage from "./pages/ApplicationStatusPage.jsx";
-import ScheduleManagementPage from "./pages/ScheduleManagementPage.jsx";
-
-// รองรับ: FR-LOG-01, FR-LOG-05, AC-LOG-01
 function RouteRoot() {
   const [pathname, setPathname] = useState(window.location.pathname);
+  const [search, setSearch] = useState(window.location.search);
 
   useEffect(() => {
     function handleNavigation() {
       setPathname(window.location.pathname);
+      setSearch(window.location.search);
     }
 
-    window.addEventListener("popstate", handleNavigation);
-    return () => window.removeEventListener("popstate", handleNavigation);
+    window.addEventListener('popstate', handleNavigation);
+    return () => window.removeEventListener('popstate', handleNavigation);
   }, []);
 
-  return ["/login", "/home"].includes(pathname) ? (
-    <App />
-  ) : (
-    <ApplicationStatusPage />
-  );
-}
+  const params = new URLSearchParams(search);
+  const feature = params.get('feature');
 
-createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <RouteRoot />
-    <ScheduleManagementPage />
-import VoteLocationPage from "./pages/VoteLocationPage.jsx";
-
-function renderPage() {
-  const match = window.location.pathname.match(/^\/applicants\/([^/]+)\/edit\/?$/);
-  if (match) {
-    return <ApplicantEditPage applicantId={decodeURIComponent(match[1])} />;
+  // UC-01 / UC-07 feature pages
+  if (feature === 'vote-location') {
+    return <VoteLocationPage />;
   }
-  if (window.location.pathname === "/applicants/search") {
+
+  if (feature === 'community-location') {
+    return <CommunityLocationPage />;
+  }
+
+  if (feature === 'project-approval') {
+    return <ProjectApprovalPage />;
+  }
+
+  // Applicant pages
+  const editMatch = pathname.match(
+    /^\/applicants\/([^/]+)\/edit\/?$/
+  );
+
+  if (editMatch) {
+    return (
+      <ApplicantEditPage
+        applicantId={decodeURIComponent(editMatch[1])}
+      />
+    );
+  }
+
+  if (/^\/applicants\/?$/.test(pathname)) {
     return <ApplicantSearchPage />;
   }
-  return <ApplicationStatusPage />;
+
+  // Schedule management
+  if (/^\/schedule\/?$/.test(pathname)) {
+    return <ScheduleManagementPage />;
+  }
+
+  // Application status
+  if (
+    pathname === '/application-status' ||
+    pathname === '/applications/status'
+  ) {
+    return <ApplicationStatusPage />;
+  }
+
+  // Login, role home, enrollment and other App routes
+  if (
+    pathname === '/login' ||
+    pathname === '/home' ||
+    pathname === '/enrollment' ||
+    pathname === '/camp-enrollment'
+  ) {
+    return <App />;
+  }
+
+  // Preserve the original default page
+  return <VoteLocationPage />;
 }
 
-createRoot(document.getElementById("root")).render(
+createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <VoteLocationPage />
-  </React.StrictMode>,
+    <RouteRoot />
+  </React.StrictMode>
 );
