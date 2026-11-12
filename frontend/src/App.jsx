@@ -3,6 +3,8 @@ import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { apiClient } from './api/client.js';
 import { createDemoApiClient } from './api/demoClient.js';
 import CampEnrollmentPage from './pages/CampEnrollmentPage.jsx';
+import CommunityLocationPage from './pages/CommunityLocationPage.jsx';
+import ProjectApprovalPage from './pages/ProjectApprovalPage.jsx';
 import ApplicantApplicationPage from './pages/ApplicantApplicationPage.jsx';
 
 export const ApiClientContext = createContext(apiClient);
@@ -76,6 +78,13 @@ function DemoApp() {
 
 // รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-04
 export default function App({ client = apiClient, children }) {
+  // UC-01 FR-01-01: feature-scoped page, preserving the existing enrollment home.
+  if (new URLSearchParams(window.location.search).get('feature') === 'community-location') {
+    return <CommunityLocationPage />;
+  }
+  if (new URLSearchParams(window.location.search).get('feature') === 'project-approval') {
+    return <ProjectApprovalPage />;
+  }
   if (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true') {
     return <DemoApp />;
   }

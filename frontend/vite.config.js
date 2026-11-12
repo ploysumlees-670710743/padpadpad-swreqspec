@@ -6,6 +6,10 @@ export default defineConfig(({ mode }) => {
   const proxy = VITE_DEMO_MODE === 'true'
     ? {}
     : {
+        '/api': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+        },
         '/enrollment': {
           target: 'http://localhost:8000',
           changeOrigin: true,
@@ -18,5 +22,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: { proxy },
+    // UC-01/UC-07 contracts run separately with node --test.
+    test: { exclude: ['**/node_modules/**', '**/dist/**', '**/uc01_uc07_prototype.test.js'] },
   };
 });

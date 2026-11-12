@@ -34,3 +34,17 @@
 
 ## 4. Open Issues / Dependency to Resolve
 * **Q-01-01 Validation Rules:** หากมีการยืนยันรูปแบบเบอร์โทรหรือกฎห้ามชื่อซ้ำจากอาจารย์ จะต้องเพิ่ม Validation Logic ใน API Layer ในภายหลัง
+
+---
+## 5. Technology & Integration (team choice, not from spec)
+
+**ทีมเลือกเอง ไม่ได้มาจาก spec:** React 18 + Vite 6 (existing frontend); Python FastAPI + SQLite (existing UC-08/UC-14 application at `backend/app/main.py`). Another existing enrollment backend uses PostgreSQL; we are **not** replacing or modifying it. Integration into a single production database is a separate team decision.
+
+- Persistence: `backend/app/services/community_location_service.py` manages feature-scoped tables `uc01_communities` and `uc01_community_assignments`, referencing existing `camp_locations`. It does not mutate the shared `backend/db/schema.sql`.
+- API: POST `/api/communities`, GET `/api/locations/{id}/communities`, PUT `/api/communities/{community_id}` (the edit capability is required by C-01).
+- Auth: `request.state.user_id` and `request.state.role` must be populated by a trusted middleware from UC-09; **no request body/user ID header is trusted**. Until integration the feature denies access (fail closed).
+- Assignment provisioning is a dependency on team authentication/management; users cannot self-assign locations via this API.
+- UI: `?feature=community-location` reaches the React page without rewriting the shared enrollment flow.
+- AC-01 fields: community_name, caretaker_name, contact_phone required; caretaker_title and local_rules optional (because AC-01 does not make them mandatory).
+- Q-01-01 / Q-01-02 remain unresolved; no guessed phone regex, duplicate names, or attachment upload.
+- Verification: `pytest -v backend/tests/test_AC_01.py` then all project tests; measure QR-01 against real deployment.

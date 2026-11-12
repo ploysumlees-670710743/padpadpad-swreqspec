@@ -34,3 +34,17 @@
 
 ## 4. Open Issues / Dependency to Resolve
 * **Q-07-01 Multi-tier Approval:** รอการยืนยันว่าอนาคตต้องมีผู้อนุมัติมากกว่า 1 ท่านหรือไม่
+
+---
+## 5. Technology & Integration (team choice, not from spec)
+
+**ทีมเลือกเอง ไม่ได้มาจาก spec:** FastAPI, React + Vite, SQLite within the existing `backend/app/main.py` application. This choice follows existing UC-08/UC-14 code and does not replace the separate PostgreSQL-backed enrollment subsystem.
+
+- Existing `camp_projects` is the master project table (project_id/project_name/status). Approval state is maintained **separately** in `uc07_project_approvals` because `camp_projects.status` currently only permits active/draft/archived.
+- Feature-specific `uc07_project_memberships`, `uc07_approval_history`, `uc07_notifications` are initialized by `ProjectApprovalService` without altering the shared `backend/db/schema.sql`.
+- UC-09 must inject trusted `request.state.user_id` and `request.state.role`; committee/adviser project membership must be safely provisioned separately. All routes deny unauthorized callers.
+- API: POST `/api/projects/{id}/approval/submit` for committee, POST `/api/projects/{id}/approval` for assigned adviser, GET approval status and committee notification list. No multi-tier approval until Q-07-01 is resolved.
+- Revision can be resubmitted, rejected is terminal; history inserts cannot be updated/deleted. Notifications are in-app rows, not SMS/Email.
+- Frontend: React page via `?feature=project-approval`; shared enrollment UI unchanged.
+- **SPEC BLOCKER:** spec.md includes a second copy of functional requirements reusing FR-07-01..FR-07-05 with different meanings. Do not mark RTM fully verified or declare all tasks complete until human resolves duplicated identifiers.
+- Integration gap: existing `camp_projects` only has project name/status, so full document/detail review requires team data connection, not guessed extra fields.

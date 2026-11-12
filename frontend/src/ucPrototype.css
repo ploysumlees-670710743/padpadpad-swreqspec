@@ -1,0 +1,91 @@
+/* UI styling is scoped to UC-01/UC-07 prototype pages, not classmates' features. */
+body:has(.uc-topbar) {
+  margin: 0;
+  background: #f5f7fb;
+  color: #14213d;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.uc-topbar {
+  background: #10294a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px max(20px, calc((100vw - 1080px) / 2));
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.uc-topbar a { color: #fff; text-decoration: none; }
+.uc-brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 750; }
+.uc-logo { background: #2bc8bc; color: #073938; border-radius: 10px; width: 32px; height: 32px; display: grid; place-items: center; }
+.uc-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.uc-links a { font-size: 14px; padding: 10px 14px; border-radius: 10px; color: #dce8f4; }
+.uc-links a.active { background: #294766; color: white; }
+.uc-demo-banner {
+  margin: 16px auto 0;
+  max-width: 1060px;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  border: 1px solid #ffdfa1; background: #fff7e7; border-radius: 10px;
+  color: #765008; font-size: 14px;
+}
+.uc-demo-banner strong { letter-spacing: 0.05em; font-size: 12px; }
+main.uc-page {
+  max-width: 1060px !important;
+  padding: 22px !important;
+  margin: 8px auto 40px !important;
+}
+.uc-page h1 { letter-spacing: -.03em; font-size: clamp(25px, 4vw, 34px); margin: 10px 0 20px; }
+.uc-page h2 { font-size: 20px; margin: 0 0 16px; }
+.uc-page h3 { font-size: 16px; }
+.uc-page form, .uc-page section {
+  background: #fff;
+  border: 1px solid #e3e8f1;
+  box-shadow: 0 6px 24px rgba(24, 40, 68, .045);
+  border-radius: 15px;
+  padding: 22px;
+  margin: 15px 0;
+}
+.uc-page label { display: block; margin: 11px 0 6px; font-size: 14px; font-weight: 650; color: #334868; }
+.uc-page input, .uc-page textarea, .uc-page select {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #becbdb;
+  border-radius: 9px;
+  color: #173253;
+  background: white;
+  font: inherit;
+}
+.uc-page textarea { min-height: 94px; resize: vertical; }
+.uc-page button {
+  margin: 14px 9px 0 0;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 9px;
+  background: #087f8b;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.uc-page button:hover:not(:disabled) { background: #056571; }
+.uc-page button:disabled { background: #a4b6c0; cursor: not-allowed; }
+.uc-page [role="alert"] { padding: 13px; background: #fff1f0; color: #9d2020; border-radius: 9px; }
+.uc-page [role="status"] { padding: 13px; background: #e8fbf4; color: #116044; border-radius: 9px; }
+.uc-page ul { list-style: none; margin: 0; padding: 0; }
+.uc-page li { margin: 10px 0; padding: 12px 14px; border: 1px solid #e3e8f1; border-radius: 10px; background: white; }
+.uc-page li button { margin: 8px 0 0 12px; font-size: 13px; padding: 7px 11px; }
+.uc-helper { font-size: 14px; color: #526781; margin: 0 0 15px; line-height: 1.65; }
+.uc-tag { display: inline-block; color: #075d61; background: #d9f6f3; padding: 4px 9px; border-radius: 7px; font-size: 12px; font-weight: 700; }
+.uc-footer { text-align: center; padding: 0 20px 25px; color: #6d7e92; font-size: 12px; }
+@media (max-width: 550px) {
+  .uc-topbar { padding: 12px 16px; }
+  .uc-links { width: 100%; }
+  .uc-links a { flex: 1; text-align: center; }
+  main.uc-page { padding: 14px !important; }
+  .uc-page form, .uc-page section { padding: 16px; }
+  .uc-demo-banner { margin: 12px 14px 0; }
+}
