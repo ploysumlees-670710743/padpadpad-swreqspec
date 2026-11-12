@@ -4,6 +4,8 @@ import { apiClient } from './api/client.js';
 import { createDemoApiClient } from './api/demoClient.js';
 import CampEnrollmentPage from './pages/CampEnrollmentPage.jsx';
 import ApplicantApplicationPage from './pages/ApplicantApplicationPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import RoleHomePage from './pages/RoleHomePage.jsx';
 
 export const ApiClientContext = createContext(apiClient);
 
@@ -74,15 +76,89 @@ function DemoApp() {
   );
 }
 
-// รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-04
+// รองรับ: FR-LOG-01, FR-LOG-02, FR-LOG-05, AC-LOG-01
 export default function App({ client = apiClient, children }) {
+  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [home, setHome] = useState(null);
+  const [homeError, setHomeError] = useState('');
+
+  useEffect(() => {
+    function handleNavigation() {
+      setPathname(window.location.pathname);
+      setHome(null);
+      setHomeError('');
+    }
+
+    window.addEventListener('popstate', handleNavigation);
+    return () => window.removeEventListener('popstate', handleNavigation);
+  }, []);
+
+  useEffect(() => {
+    if (
+      children
+      || pathname !== '/home'
+      || home
+      || (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true')
+    ) {
+      return undefined;
+    }
+
+    let active = true;
+    client.getRoleHome()
+      .then((response) => response.json())
+      .then((homeData) => {
+        if (active) setHome(homeData);
+      })
+      .catch((error) => {
+        if (active) setHomeError(error.message);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [children, client, home, pathname]);
+
   if (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true') {
     return <DemoApp />;
   }
 
+  if (children) {
+    return (
+      <ApiClientContext.Provider value={client}>
+        <main>{children}</main>
+      </ApiClientContext.Provider>
+    );
+  }
+
+  // รองรับ: FR-LOG-05, AC-LOG-01
+  function navigate(path) {
+    window.history.pushState({}, '', path);
+    setPathname(path);
+  }
+
+  if (pathname === '/login') {
+    return (
+      <LoginPage
+        client={client}
+        onLoginSuccess={(homeData) => {
+          setHome(homeData);
+          navigate(homeData.home_url);
+        }}
+      />
+    );
+  }
+
+  if (pathname === '/home') {
+    if (homeError) return <p role="alert">{homeError}</p>;
+    if (!home) return <p role="status">กำลังโหลดข้อมูล</p>;
+    return <RoleHomePage home={home} />;
+  }
+
   return (
     <ApiClientContext.Provider value={client}>
-      <main>{children ?? <EnrollmentFlow client={client} />}</main>
+      <main>
+        <EnrollmentFlow client={client} />
+      </main>
     </ApiClientContext.Provider>
   );
 }
