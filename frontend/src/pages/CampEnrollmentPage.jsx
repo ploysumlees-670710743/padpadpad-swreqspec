@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { mockEnrollmentClient } from '../api/mockEnrollmentClient.js';
 
 import { apiClient } from '../api/client.js';
 import EnrollmentForm from '../components/EnrollmentForm.jsx';
@@ -35,7 +36,16 @@ function assertCampRequirements(camp) {
 }
 
 // รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-03, FR-ENR-04, FR-ENR-06, FR-ENR-07, CON-ENR-01, CON-ENR-02, NFR-USE-01, NFR-SEC-01
-export default function CampEnrollmentPage({ client = apiClient, onSubmitted }) {
+// export default function CampEnrollmentPage({ client = apiClient, onSubmitted }) {
+const defaultClient =
+  import.meta.env.VITE_ENROLLMENT_MOCK === 'true'
+    ? mockEnrollmentClient
+    : apiClient;
+
+export default function CampEnrollmentPage({
+  client = defaultClient,
+  onSubmitted,
+}) {
   const [camp, setCamp] = useState(null);
   const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -159,6 +169,12 @@ export default function CampEnrollmentPage({ client = apiClient, onSubmitted }) 
 
   return (
     <section className="enrollment-page">
+      {client === mockEnrollmentClient && (
+        <p className="notice notice-info" role="status">
+          โหมดทดลอง (Mock Mode) — ข้อมูลจำลองเท่านั้น
+          การบันทึกและการส่งใบสมัครไม่ได้เชื่อมต่อระบบจริง
+        </p>
+      )}
       <header className="page-heading">
         <div>
           <p className="eyebrow">CAMP ENROLLMENT</p>

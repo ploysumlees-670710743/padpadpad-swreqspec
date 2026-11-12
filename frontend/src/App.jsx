@@ -1,15 +1,18 @@
 import React, { createContext, useEffect, useMemo, useState } from 'react';
+import { mockEnrollmentClient } from './api/mockEnrollmentClient.js';
 
 import { apiClient } from './api/client.js';
 import { createDemoApiClient } from './api/demoClient.js';
+
 import CampEnrollmentPage from './pages/CampEnrollmentPage.jsx';
 import ApplicantApplicationPage from './pages/ApplicantApplicationPage.jsx';
+import CommunityLocationPage from './pages/CommunityLocationPage.jsx';
+import ProjectApprovalPage from './pages/ProjectApprovalPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RoleHomePage from './pages/RoleHomePage.jsx';
 
 export const ApiClientContext = createContext(apiClient);
 
-// รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-04, FR-ENR-07
 function EnrollmentFlow({ client }) {
   const [applicationId, setApplicationId] = useState(
     () => new URLSearchParams(window.location.search).get('application'),
@@ -17,8 +20,11 @@ function EnrollmentFlow({ client }) {
 
   useEffect(() => {
     const handleNavigation = () => {
-      setApplicationId(new URLSearchParams(window.location.search).get('application'));
+      setApplicationId(
+        new URLSearchParams(window.location.search).get('application'),
+      );
     };
+
     window.addEventListener('popstate', handleNavigation);
     return () => window.removeEventListener('popstate', handleNavigation);
   }, []);
@@ -31,21 +37,27 @@ function EnrollmentFlow({ client }) {
   }
 
   return applicationId ? (
-    <ApplicantApplicationPage applicationId={applicationId} client={client} />
+    <ApplicantApplicationPage
+      applicationId={applicationId}
+      client={client}
+    />
   ) : (
-    <CampEnrollmentPage client={client} onSubmitted={showApplication} />
+    <CampEnrollmentPage
+      client={client}
+      onSubmitted={showApplication}
+    />
   );
 }
 
-// รองรับ: FR-ENR-01, FR-ENR-02, FR-ENR-04, FR-ENR-07
 function DemoApp() {
   const client = useMemo(
-    () => createDemoApiClient({
-      storage: {
-        getItem: (key) => window.sessionStorage.getItem(key),
-        setItem: (key, value) => window.sessionStorage.setItem(key, value),
-      },
-    }),
+    () =>
+      createDemoApiClient({
+        storage: {
+          getItem: (key) => window.sessionStorage.getItem(key),
+          setItem: (key, value) => window.sessionStorage.setItem(key, value),
+        },
+      }),
     [],
   );
 
@@ -61,6 +73,7 @@ function DemoApp() {
         </a>
         <span className="header-label">CAMP APPLICATION</span>
       </header>
+
       <main className="site-content">
         <p className="demo-banner" role="note">
           <span className="demo-indicator" aria-hidden="true" />
@@ -69,6 +82,7 @@ function DemoApp() {
         </p>
         <EnrollmentFlow client={client} />
       </main>
+
       <footer className="site-footer">
         ตัวอย่างสำหรับการสาธิตเท่านั้น · ข้อมูลทั้งหมดเป็นข้อมูลจำลอง
       </footer>
@@ -76,11 +90,15 @@ function DemoApp() {
   );
 }
 
-// รองรับ: FR-LOG-01, FR-LOG-02, FR-LOG-05, AC-LOG-01
 export default function App({ client = apiClient, children }) {
   const [pathname, setPathname] = useState(() => window.location.pathname);
   const [home, setHome] = useState(null);
   const [homeError, setHomeError] = useState('');
+
+  const params = new URLSearchParams(window.location.search);
+  const feature = params.get('feature');
+  const isDemo =
+    import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true';
 
   useEffect(() => {
     function handleNavigation() {
@@ -95,16 +113,18 @@ export default function App({ client = apiClient, children }) {
 
   useEffect(() => {
     if (
-      children
-      || pathname !== '/home'
-      || home
-      || (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true')
+      children ||
+      pathname !== '/home' ||
+      home ||
+      isDemo
     ) {
       return undefined;
     }
 
     let active = true;
-    client.getRoleHome()
+
+    client
+      .getRoleHome()
       .then((response) => response.json())
       .then((homeData) => {
         if (active) setHome(homeData);
@@ -116,10 +136,21 @@ export default function App({ client = apiClient, children }) {
     return () => {
       active = false;
     };
-  }, [children, client, home, pathname]);
+  }, [children, client, home, pathname, isDemo]);
 
-  if (import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true') {
-    return <DemoApp />;
+  function navigate(path) {
+    window.history.pushState({}, '', path);
+    setPathname(path);
+    setHomeError('');
+  }
+
+  // Feature pages ต้องตรวจสอบก่อน Demo Mode
+  if (feature === 'community-location') {
+    return <CommunityLocationPage />;
+  }
+
+  if (feature === 'project-approval') {
+    return <ProjectApprovalPage />;
   }
 
   if (children) {
@@ -130,10 +161,8 @@ export default function App({ client = apiClient, children }) {
     );
   }
 
-  // รองรับ: FR-LOG-05, AC-LOG-01
-  function navigate(path) {
-    window.history.pushState({}, '', path);
-    setPathname(path);
+  if (isDemo) {
+    return <DemoApp />;
   }
 
   if (pathname === '/login') {
@@ -154,11 +183,16 @@ export default function App({ client = apiClient, children }) {
     return <RoleHomePage home={home} />;
   }
 
-  return (
-    <ApiClientContext.Provider value={client}>
-      <main>
-        <EnrollmentFlow client={client} />
-      </main>
-    </ApiClientContext.Provider>
-  );
+  const enrollmentClient =
+  import.meta.env.VITE_ENROLLMENT_MOCK === 'true'
+    ? mockEnrollmentClient
+    : client;
+
+return (
+  <ApiClientContext.Provider value={client}>
+    <main>
+      <EnrollmentFlow client={enrollmentClient} />
+    </main>
+  </ApiClientContext.Provider>
+);
 }
