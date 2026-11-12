@@ -1,30 +1,35 @@
-{
-  "name": "camp-application-status",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "vite": "^6.0.7"
-  },
-  "devDependencies": {
-    "@testing-library/dom": "^10.4.2",
-    "@testing-library/react": "^16.3.3",
-    "jsdom": "^26.1.0",
-    "vitest": "^3.2.7"
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.0.1",
-    "jsdom": "^25.0.1",
-    "vitest": "^2.1.8"
-    "@tailwindcss/vite": "^4.3.5",
-    "jsdom": "^25.0.1",
-    "tailwindcss": "^4.3.5",
-    "vitest": "^2.1.9"
-  }
-}
+name: Verify UC-01 and UC-07 prototype
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm test -- --run --reporter=json --outputFile=frontend-results.json
+
+      - name: Show audit summary
+        if: always()
+        run: node -e "const r=JSON.parse(require('fs').readFileSync('frontend-results.json')); console.log('::notice title=Frontend audit::passed=' + r.numPassedTests + ' failed=' + r.numFailedTests + ' total=' + r.numTotalTests)"
