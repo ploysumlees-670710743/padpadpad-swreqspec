@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+const SCHEDULE_API_BASE = API_BASE_URL ? `${API_BASE_URL}/schedule` : '/api/schedule';
 
 function getFieldValue(record, ...keys) {
   for (const key of keys) {
@@ -65,31 +66,31 @@ export async function getMyApplication() {
 
 export const apiClient = {
   getSchedule() {
-    return requestJson(`${API_BASE_URL}/schedule`);
+    return requestJson(SCHEDULE_API_BASE);
   },
 
   createScheduleActivity(payload) {
-    return requestJson(`${API_BASE_URL}/schedule/activities`, {
+    return requestJson(`${SCHEDULE_API_BASE}/activities`, {
       method: 'POST',
       body: JSON.stringify(normalizeSchedulePayload(payload)),
     });
   },
 
   updateScheduleActivity(activityId, payload) {
-    return requestJson(`${API_BASE_URL}/schedule/activities/${activityId}`, {
+    return requestJson(`${SCHEDULE_API_BASE}/activities/${activityId}`, {
       method: 'PUT',
       body: JSON.stringify(normalizeSchedulePayload(payload)),
     });
   },
 
   deleteScheduleActivity(activityId) {
-    return requestJson(`${API_BASE_URL}/schedule/activities/${activityId}`, {
+    return requestJson(`${SCHEDULE_API_BASE}/activities/${activityId}`, {
       method: 'DELETE',
     });
   },
 
   patchScheduleActivityChecklist(activityId, checklistStatus) {
-    return requestJson(`${API_BASE_URL}/schedule/activities/${activityId}/checklist`, {
+    return requestJson(`${SCHEDULE_API_BASE}/activities/${activityId}/checklist`, {
       method: 'PATCH',
       body: JSON.stringify({
         checklist_status: checklistStatus,
