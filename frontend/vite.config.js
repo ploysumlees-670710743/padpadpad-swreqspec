@@ -6,6 +6,11 @@ export default defineConfig(({ mode }) => {
   const proxy = VITE_DEMO_MODE === 'true'
     ? {}
     : {
+      '/api/schedule': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
         '/enrollment': {
           target: 'http://localhost:8000',
           changeOrigin: true,

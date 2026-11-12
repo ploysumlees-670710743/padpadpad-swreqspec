@@ -97,3 +97,43 @@ def test_TC_SCH_01_3_reject_incomplete_required_fields() -> None:
             description="",
             facilitator_or_responsible="",
         )
+
+
+def test_AC_SCH_01_create_activity_and_track_checklist() -> None:
+    from backend.app.services.schedule_service import create_activity, patch_activity_checklist
+
+    created = create_activity(
+        {
+            "activity_id": "act-201",
+            "project_id": "proj-001",
+            "location_id": "loc-001",
+            "activity_name": "กิจกรรมแผนก",
+            "activity_date": "2026-01-10",
+            "start_time": "12:00",
+            "end_time": "13:00",
+            "description": "กิจกรรมย่อยใหม่",
+            "facilitator_or_responsible": "อาจารย์สมชาย",
+        },
+        project_id="proj-001",
+    )
+
+    assert created.checklist_status == "Pending"
+
+    updated = patch_activity_checklist("act-201", "Done", project_id="proj-001")
+    assert updated.checklist_status == "Done"
+
+    with pytest.raises(ValueError, match="overlaps"):
+        create_activity(
+            {
+                "activity_id": "act-202",
+                "project_id": "proj-001",
+                "location_id": "loc-001",
+                "activity_name": "ซ้อนทับ",
+                "activity_date": "2026-01-10",
+                "start_time": "12:30",
+                "end_time": "13:30",
+                "description": "ซ้อนทับเวลา",
+                "facilitator_or_responsible": "อาจารย์หญิง",
+            },
+            project_id="proj-001",
+        )
