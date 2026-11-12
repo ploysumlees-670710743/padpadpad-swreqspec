@@ -22,7 +22,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
       - name: Execute only UC-01 and UC-07 tests
-        run: python -m pytest -v backend/tests/test_AC_01.py backend/tests/test_AC_07.py
+        run: python -m pytest -v --junitxml=backend-results.xml backend/tests/test_AC_01.py backend/tests/test_AC_07.py
 
   frontend-prototype-build:
     runs-on: ubuntu-latest
@@ -40,6 +40,15 @@ jobs:
         run: npm ci
       - name: Run UC-01/UC-07 offline prototype contract tests
         run: node --test src/__tests__/uc01_uc07_prototype.test.js
+      - name: Run UC-01/UC-07 component tests
+        run: npx vitest run src/__tests__/uc01_uc07_ui.test.jsx
+      - name: Full frontend regression audit (non-gating)
+        id: full_frontend
+        continue-on-error: true
+        run: npm test -- --reporter=json --outputFile=frontend-results.json
+      - name: Summarize frontend audit
+        if: always()
+        run: node -e "const r=JSON.parse(require('fs').readFileSync('frontend-results.json')); console.log('::notice title=Frontend audit::passed='+r.numPassedTests+' failed='+r.numFailedTests+' total='+r.numTotalTests)"
       - name: Build React/Vite frontend
         run: npm run build
 
@@ -60,7 +69,10 @@ jobs:
       - name: Run entire backend test suite (diagnostic)
         id: full_backend
         continue-on-error: true
-        run: python -m pytest -v backend/tests
+        run: python -m pytest -v --junitxml=backend-results.xml backend/tests
+      - name: Summarize backend counts
+        if: always()
+        run: python -c "import xml.etree.ElementTree as E; s=E.parse('backend-results.xml').getroot().find('testsuite'); print('::notice title=Backend audit::'+str(s.attrib))"
       - name: Summarize diagnostic
         if: always()
         run: |

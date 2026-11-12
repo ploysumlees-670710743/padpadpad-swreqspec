@@ -53,3 +53,9 @@
 - T-05: มี React form สำหรับเลือกสถานที่ที่มอบหมาย บันทึก/แก้ไขชุมชน และแสดงข้อผิดพลาด; Demo Mode ใช้ข้อมูลจำลอง
 - T-06: CI [run 43025058889](https://github.com/670710751-Boonyai/padpadpad-swreqspec/actions/runs/43025058889) ทดสอบ Backend เฉพาะ UC-01/07 17 cases และ Offline Demo 11 cases ผ่าน พร้อม Build ผ่าน; **ยังไม่มี full repo pytest, browser E2E, performance 2 วินาที และ usability verification**
 - คงรายการ checkbox เดิมไว้เพื่อรอคนตรวจ end-to-end ตามเกณฑ์ “เสร็จเมื่อ”; ดูช่องโหว่ใน [rtm.md](./rtm.md)
+
+## สถานะทบทวน 12 พ.ย. 2026 (ใช้แทนข้อความสถานะปัจจุบันในบันทึกเก่าด้านบน)
+
+ตรวจใน branch ทีม feature/751-uc01-uc07 แล้ว ดู [ผลตรวจรวม](../../docs/srs/UC01-UC07-final-review-20261112.md) สำหรับสิ่งที่ครบและยังขาด บันทึกผล Fork ด้านบนเป็นประวัติ ไม่ใช่ผลปัจจุบัน
+มี component tests ใหม่ใน frontend/src/__tests__/uc01_uc07_ui.test.jsx ผ่านสองข้อ (UC-01 บันทึกและข้อความยืนยัน; UC-07 ซ่อนปุ่มอาจารย์จาก committee) และ prototype contract ผ่าน 11 ข้อ; ยังไม่มี Browser E2E หรือ Auth จริง จึงคงสถานะ acceptance ที่ยังไม่ครบไว้
+ผล backend ใช้ Actions ของ branch ทีม; ไม่สรุป full suite ผ่านจากชื่อ job สีเขียวเมื่อเป็น non-gating ให้ดูผล diagnostic/counts ในรอบล่าสุด
