@@ -1,5 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import ScheduleManagementPage from "./pages/ScheduleManagementPage.jsx";
+
+createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <ScheduleManagementPage />
 import VoteLocationPage from "./pages/VoteLocationPage.jsx";
 
 function renderPage() {
