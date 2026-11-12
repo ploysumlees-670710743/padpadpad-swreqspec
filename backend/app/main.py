@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from backend.app.api.application_status import router as application_status_router
+from backend.app.api.schedule import router as schedule_router
 from backend.app.api.votes import router as votes_router
 from backend.app.services.application_status_service import ApplicationStatusService
 from backend.app.services.vote_service import VoteService
@@ -21,4 +22,5 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Camp Application Status", lifespan=lifespan)
 app.include_router(application_status_router)
+app.include_router(schedule_router)
 app.include_router(votes_router)
