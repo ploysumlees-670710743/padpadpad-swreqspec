@@ -19,6 +19,23 @@ class ApplicationStatusService:
         """Create schema used by the status endpoint (FR-STA-01)."""
 
         with sqlite3.connect(self.database_path) as connection:
+            existing_columns = {
+                row[1]
+                for row in connection.execute("PRAGMA table_info(applications)")
+            }
+            if existing_columns:
+                # Keep existing status databases usable as enrollment columns are added.
+                for column, definition in (
+                    ("applicant_id", "TEXT"),
+                    ("camp_id", "TEXT"),
+                    ("form_data_json", "TEXT"),
+                    ("status", "TEXT"),
+                    ("submitted_at", "TEXT"),
+                ):
+                    if column not in existing_columns:
+                        connection.execute(
+                            f"ALTER TABLE applications ADD COLUMN {column} {definition}"
+                        )
             connection.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
 
     def get_for_student(self, student_id: str) -> list[ApplicationStatus]:

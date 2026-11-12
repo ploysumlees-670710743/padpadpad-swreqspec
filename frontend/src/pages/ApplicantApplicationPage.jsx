@@ -98,7 +98,7 @@ export default function ApplicantApplicationPage({
                       <path d="M12 7v5l3 2" />
                     </svg>
                   </span>
-                  <span>รอตรวจสอบ</span>
+                  <span>ตรวจสอบ</span>
                 </li>
               </ol>
               <section className="application-success" aria-labelledby="application-success-heading">
@@ -116,7 +116,7 @@ export default function ApplicantApplicationPage({
                 <dl className="application-status-summary">
                   <div>
                     <dt>สถานะใบสมัคร</dt>
-                    <dd>รอตรวจสอบ</dd>
+                    <dd>กำลังตรวจสอบ</dd>
                   </div>
                   <div>
                     <dt>ขั้นตอนถัดไป</dt>

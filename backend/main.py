@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
 from backend.app.api.camp_enrollment import router as camp_enrollment_router
+from backend.app.api.authentication import router as authentication_router
 from backend.app.db.database import ensure_database
 
 
@@ -34,6 +35,7 @@ def create_app(
     app = FastAPI(title="Camp Enrollment API", lifespan=lifespan)
     app.state.session_secret = session_secret
     app.add_middleware(SessionMiddleware, secret_key=session_secret)
+    app.include_router(authentication_router)
     app.include_router(camp_enrollment_router)
     return app
 
