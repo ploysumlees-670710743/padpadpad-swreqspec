@@ -51,3 +51,20 @@
 8. เจ้าของ enrollment ตรวจปัญหา frontend รวม 11 ข้อก่อนอ้างว่า regression ทั้งระบบผ่าน
 
 ผล CI รอบล่าสุดให้ดู workflow Verify UC-01 and UC-07 prototype บน commit ของรอบตรวจนี้ (full audits ไม่ใช่ gate ต้องดูจำนวน errors/failures)
+
+## หลักฐาน GitHub Actions ที่ตรวจยืนยันแล้ว
+
+[Run 43174829130](https://github.com/ploysumlees-670710743/padpadpad-swreqspec/actions/runs/43174829130) ทดสอบ commit 3938bd35ad8a26b6d0ef7da104c1f239d55e4499 บน Ubuntu / Python 3.12 / Node 22:
+
+| ชุดตรวจ | ผลจริง |
+|---|---|
+| Backend เฉพาะ UC-01/UC-07 | ขั้น Execute only UC-01 and UC-07 tests ผ่าน |
+| Offline prototype | ผ่าน (เครื่องนี้ 11/11) |
+| Component tests ของสอง UC | ผ่าน (เครื่องนี้ 2/2) |
+| Frontend build | ผ่าน |
+| Frontend รวม | annotation: passed=28 failed=11 total=39; exit code 1 |
+| Backend รวม | annotation JUnit: errors=16 failures=0 tests=16; exit code 2 — เป็น collection errors ไม่ใช่ 16 tests ที่รันผ่าน |
+
+Workflow รวมแสดง success เพราะ audits ตั้ง continue-on-error; ต้องอ่านตัวเลขและ exit code ด้านบน ห้ามใช้สีเขียวตัดสินว่าทั้ง repository ผ่าน
+ข้อแก้ไขต่อคำสรุปก่อนหน้า: คำกล่าวว่า backend รวมผ่านไม่ถูกต้อง ผลรอบนี้ยืนยันว่าเก็บชุดทดสอบไม่ครบ 16 errors สาเหตุรายไฟล์ต้องเปิด logs ของ Full backend regression audit ไม่อนุมานว่าเป็นปัญหาเดียวกับผล Fork เก่า
+ไฟล์/ผลที่เปลี่ยนหลัง commit ทดสอบนี้เป็นบันทึกผลตรวจเท่านั้น ไม่แก้โค้ดที่ทดสอบแล้ว
