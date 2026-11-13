@@ -37,13 +37,28 @@ class ApplicantService:
         """Create the shared applicant and audit schema for FR-REG-01."""
 
         with sqlite3.connect(self.database_path) as connection:
-            connection.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+            tables = {
+                row[0]
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type = 'table'"
+                )
+            }
+            if "applicants" not in tables or "applicant_audit_logs" not in tables:
+                connection.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+
             columns = {
                 row[1]
                 for row in connection.execute(
                     "PRAGMA table_info(applicant_audit_logs)"
                 )
             }
+            if "applicant_id" not in columns:
+                connection.execute(
+                    """
+                    ALTER TABLE applicant_audit_logs
+                    ADD COLUMN applicant_id TEXT NOT NULL DEFAULT ''
+                    """
+                )
             if "retention_until" not in columns:
                 connection.execute(
                     """

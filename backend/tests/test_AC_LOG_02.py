@@ -62,3 +62,35 @@ def test_AC_LOG_02_invalid_credentials() -> None:
         assert response.status_code == 401
         assert response.json() == {"detail": "Authentication failed."}
         assert client.get("/home").status_code == 401
+
+
+def test_TC_LOG_02_1_correct_username_wrong_password() -> None:
+    client = _client()
+
+    # Given: ผู้ใช้งานอยู่ที่หน้าเข้าสู่ระบบ
+    # When: ผู้ใช้งานกรอก username ถูกต้องและ password ไม่ถูกต้อง
+    response = client.post(
+        "/login",
+        json={"username": "student-01", "password": "incorrect-password"},
+    )
+
+    # Then: ระบบแสดงข้อความตาม AC-LOG-02 ผ่าน LoginErrorState ของหน้าจอ
+    # และคงผู้ใช้งานไว้ที่หน้าเข้าสู่ระบบเพื่อให้แก้ไขข้อมูลและลองใหม่
+    assert response.status_code == 401
+    assert client.get("/home").status_code == 401
+
+
+def test_TC_LOG_02_2_wrong_username_correct_password() -> None:
+    client = _client()
+
+    # Given: ผู้ใช้งานอยู่ที่หน้าเข้าสู่ระบบ
+    # When: ผู้ใช้งานกรอก username ไม่ถูกต้องและ password ถูกต้อง
+    response = client.post(
+        "/login",
+        json={"username": "unknown-user", "password": "correct-password"},
+    )
+
+    # Then: ระบบแสดงข้อความตาม AC-LOG-02 ผ่าน LoginErrorState ของหน้าจอ
+    # และคงผู้ใช้งานไว้ที่หน้าเข้าสู่ระบบเพื่อให้แก้ไขข้อมูลและลองใหม่
+    assert response.status_code == 401
+    assert client.get("/home").status_code == 401

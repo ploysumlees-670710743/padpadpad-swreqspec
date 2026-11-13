@@ -5,10 +5,13 @@ from fastapi import HTTPException, Request, status
 # รองรับ: CON-ENR-02, NFR-SEC-01, CON-SCH-03
 
 
-def bind_session_user(request: Request, user_id: str) -> str:
-    """Persist the authenticated user in the signed session and request state (NFR-SEC-01)."""
+def bind_session_user(request: Request, user_id: str, role: str | None = None) -> str:
+    """Persist the authenticated user and role in the signed session and request state."""
     request.session["user_id"] = user_id
     request.state.user_id = user_id
+    if role is not None:
+        request.session["role"] = role
+        request.state.role = role
     return user_id
 
 

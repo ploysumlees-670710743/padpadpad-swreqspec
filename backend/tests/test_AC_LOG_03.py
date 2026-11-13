@@ -53,6 +53,11 @@ def _client() -> TestClient:
             "active",
             "administrator",
         ),
+        "active-student": (
+            hash_password("correct-password"),
+            "active",
+            "student",
+        ),
     })
     app.dependency_overrides[get_authentication_connection] = lambda: connection
     return TestClient(app)
@@ -71,3 +76,51 @@ def test_AC_LOG_03_unauthorized_account() -> None:
         assert response.status_code == 403
         assert response.json() == {"detail": "Account is not authorized."}
         assert client.get("/home").status_code == 401
+
+
+def test_TC_LOG_03_1_unsupported_role_denied() -> None:
+    client = _client()
+
+    # Given: ผู้ใช้งานอยู่ที่หน้าเข้าสู่ระบบและบัญชีมีบทบาทนอกเหนือจากบทบาทที่อนุญาต
+    # When: ผู้ใช้งานพยายามเข้าสู่ระบบด้วยข้อมูลของบัญชีนั้น
+    response = client.post(
+        "/login",
+        json={"username": "unsupported-user", "password": "unsupported-password"},
+    )
+
+    # Then: ระบบปฏิเสธการเข้าสู่ระบบและคงผู้ใช้งานไว้ที่หน้าเข้าสู่ระบบ
+    assert response.status_code == 403
+    assert client.get("/home").status_code == 401
+
+
+def test_TC_LOG_03_2_suspended_allowed_role_denied() -> None:
+    client = _client()
+
+    # Given: ผู้ใช้งานอยู่ที่หน้าเข้าสู่ระบบและบัญชีบทบาทนักศึกษาถูกระงับ
+    # When: ผู้ใช้งานพยายามเข้าสู่ระบบด้วยข้อมูลของบัญชีนั้น
+    response = client.post(
+        "/login",
+        json={"username": "suspended-user", "password": "suspended-password"},
+    )
+
+    # Then: ระบบปฏิเสธการเข้าสู่ระบบและคงผู้ใช้งานไว้ที่หน้าเข้าสู่ระบบ
+    assert response.status_code == 403
+    assert client.get("/home").status_code == 401
+
+
+def test_TC_LOG_03_3_active_student_login_succeeds() -> None:
+    client = _client()
+
+    # Given: ผู้ใช้งานอยู่ที่หน้าเข้าสู่ระบบและมีบัญชีนักศึกษาในสถานะ Active
+    # When: ผู้ใช้งานกรอก username/password ถูกต้องแล้วเข้าสู่ระบบ
+    response = client.post(
+        "/login",
+        json={"username": "active-student", "password": "correct-password"},
+    )
+
+    # Then: ระบบนำผู้ใช้งานเข้าสู่หน้าหลักที่แสดงเมนูเฉพาะบทบาทนักศึกษา
+    assert response.status_code == 200
+    assert response.json()["menu"] == ["สมัครค่าย", "ดูค่าย"]
+    home_response = client.get("/home")
+    assert home_response.status_code == 200
+    assert home_response.json()["menu"] == ["สมัครค่าย", "ดูค่าย"]
