@@ -57,9 +57,39 @@ def require_schedule_manage_access(permission: UserPermission | dict[str, Any] |
             detail="You do not have permission to manage the schedule.",
         )
     return parsed
-"""Authorization dependencies for UC-08 voting."""
+"""Authorization dependencies for applicant editing and UC-08 voting."""
 
 from fastapi import HTTPException, Request, status
+
+from backend.app.models.user_account import UserAccount
+
+
+def get_current_editor(request: Request) -> UserAccount:
+    """Allow committee/admin editors to access applicant-edit routes; fail closed otherwise."""
+    user = getattr(request.state, "user", None)
+    if isinstance(user, UserAccount):
+        if user.role not in {"committee", "admin"}:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to edit applicants.",
+            )
+        return user
+
+    user_id = getattr(request.state, "user_id", None)
+    role = getattr(request.state, "role", None)
+    if isinstance(user_id, str) and user_id and isinstance(role, str) and role in {"committee", "admin"}:
+        return UserAccount(user_id=user_id, role=role, display_name=role)
+
+    if user_id is not None or role is not None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to edit applicants.",
+        )
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required",
+    )
 
 
 def get_authenticated_voter_id(request: Request) -> str:
