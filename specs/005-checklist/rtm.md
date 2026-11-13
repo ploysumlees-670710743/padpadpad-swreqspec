@@ -38,8 +38,8 @@
 
 | F-ID | ชนิด | อยู่ที่ | ขัดกับ | รายละเอียด | ทีมตัดสิน |
 |---|---|---|---|---|---|
-| F-SCH-01 | test อ่อน / state leakage | `backend/app/services/schedule_service.py` | FR-SCH-01, NFR-SEC-01 | `_SCHEDULE_STORE` เป็น global mutable state และไม่ได้ reset ระหว่าง test ทำให้ `test_schedule_view_requires_can_view_schedule` fail เมื่อรัน full backend suite; sample result: ค่ากิจกรรมแรกกลับมาจาก state ที่เคย mutate ก่อนหน้า |  |
-| F-ENR-01 | โค้ดไม่มี FR / AC ไม่มี test | `backend/db/schema.sql`, `tests/test_enrollment_schema_foundation.py` | spec ของ feature อื่น (Enrollment) ไม่ใช่ schedule แต่ full repo still red | `schema.sql` ใช้ `camp_projects` แทนชื่อตารางที่ test คาดว่า `camps` ทำให้ backend full suite fail แม้ไม่ได้เกี่ยวกับ schedule |  |
+| F-SCH-01 | test อ่อน / state leakage | `backend/app/services/schedule_service.py` | FR-SCH-01, NFR-SEC-01 | `_SCHEDULE_STORE` เป็น global mutable state และไม่ได้ reset ระหว่าง test ทำให้ `test_schedule_view_requires_can_view_schedule` fail เมื่อรัน full backend suite; sample result: ค่ากิจกรรมแรกกลับมาจาก state ที่เคย mutate ก่อนหน้า | แก้โค้ด — แยก State ของแต่ละ Test หรือเพิ่มกลไก Reset/Isolation เพื่อป้องกันข้อมูลจาก Test ก่อนหน้ากระทบ Test ถัดไป |
+| F-ENR-01 | โค้ดไม่มี FR / AC ไม่มี test | `backend/db/schema.sql`, `tests/test_enrollment_schema_foundation.py` | spec ของ feature อื่น (Enrollment) ไม่ใช่ schedule แต่ full repo still red | `schema.sql` ใช้ `camp_projects` แทนชื่อตารางที่ test คาดว่า `camps` ทำให้ backend full suite fail แม้ไม่ได้เกี่ยวกับ schedule | ไม่ใช่ปัญหาของ Schedule — เป็นความไม่สอดคล้องระหว่าง Schema กับ Test ของ Enrollment ให้ทีมเจ้าของ Enrollment ตรวจสอบและแก้ไขแยกต่างหาก |
 
 ## 4. แก้แล้ว
 | F-ID | แก้อย่างไร | รู้ได้อย่างไร |

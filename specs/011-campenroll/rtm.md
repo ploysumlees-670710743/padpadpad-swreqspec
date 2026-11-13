@@ -105,9 +105,9 @@
 - ไม่รัน Tests หรือ Verify ซ้ำ; คง Findings เดิมและ T-10 เป็น Deferred; ผลทดสอบ fake connection ไม่ยืนยัน PostgreSQL Integration หรือ Staff Review
 - ไม่แก้ Production Code
 
-## 10. RTM ปัจจุบัน: CR-011-01 (spec Draft v4)
+## 10. RTM ก่อนการตรวจรอบ 2569-11-13: CR-011-01 (spec Draft v4)
 
-ส่วนที่ 1–9 ข้างต้นเป็นหลักฐานก่อน Change Request และไม่ใช้แทนการตรวจ CR-011-01. ตารางนี้เป็น traceability ปัจจุบัน โดยคง Requirement/AC/Task IDs เดิมและเปลี่ยนความหมายที่เกี่ยวข้องกับการแนบเอกสารตามมติทีม. ชุดทดสอบเต็มหลัง CR ผ่าน Backend 64 tests และ Frontend 24 tests; Frontend Build สำเร็จ.
+ตารางนี้และส่วนที่ 1–9 เป็นหลักฐานก่อนการตรวจรอบ 2569-11-13; ให้ใช้ผลตรวจล่าสุดในหัวข้อ 11 สำหรับสถานะปัจจุบัน.
 
 | ID | AC ปัจจุบัน | Tasks ที่เกี่ยวข้อง | Code/Test ที่ตรวจหลัง CR-011-01 | สถานะ |
 |---|---|---|---|---|
@@ -128,5 +128,68 @@
 | NFR-DATA-01 | AC-ENR-05 | T-01, T-05, T-12, T-13 | Draft/GET Application data; legacy document schema retained; `test_AC_ENR_05.py` | ผ่านในชุดเต็ม |
 | NFR-SEC-01 | AC-ENR-01, AC-ENR-05 | T-02, T-05, T-06, T-10, T-12, T-13 | owner-scoped Draft/Application; session tests | ผ่านในชุดเต็ม; Login จริงยังไม่ยืนยัน |
 | NFR-REL-01 | AC-ENR-02, AC-ENR-03, AC-ENR-04 | T-07 ถึง T-09, T-14 ถึง T-17 | failed validation preserves Draft; no Application until valid | ผ่านในชุดเต็ม |
+
+## 11. RTM ผลตรวจล่าสุด: /verify 2569-11-13 (CR-011-01)
+
+ผลทดสอบ: `cd backend && pytest -v` เก็บ test ไม่สำเร็จ (9 collection errors; ไม่มี test เริ่มทำงาน); tests enrollment ที่รันแยกผ่าน 60; Login tests ที่รันแยกผ่าน 9. `cd frontend && npm test`: ผ่าน 35, ไม่ผ่าน 13 (6 รายการเกี่ยวกับ Camp Enrollment); เมื่อรัน 3 ไฟล์ frontend ที่เกี่ยวข้องด้วย `VITE_ENROLLMENT_MOCK=false` ผ่าน 8. Frontend Build ไม่ได้รันในรอบนี้.
+
+### 11.1 ตามรอยไปข้างหน้า (requirement ไป AC ไป task ไป โค้ด ไป test)
+สรุป 17 IDs: ครบ 6, ยังไม่ถึง 1, รอ Q-xx 0, ช่องโหว่ 10
+
+| ID | AC | task | โค้ด (ไฟล์: ฟังก์ชัน) | test (ผล) | สถานะ |
+|---|---|---|---|---|---|
+| FR-ENR-01 | AC-ENR-01 | T-04, T-06 | `camp_enrollment.py: read_configured_camp`; `camp_enrollment_service.py: get_configured_camp`; `App.jsx: EnrollmentFlow` | `test_configured_camp_api_AC_ENR_01` ผ่าน; `AC_ENR_01.test.jsx` ล้มเมื่อใช้ค่า env ปริยาย แต่ 2 tests ผ่านเมื่อ `VITE_ENROLLMENT_MOCK=false` (F-07) | ช่องโหว่ |
+| FR-ENR-02 | AC-ENR-01 | T-05, T-06 | `enrollment_draft_service.py: save_draft, get_draft`; `EnrollmentForm`, `CampEnrollmentPage` | `test_draft_owner_save_load_AC_ENR_01` ผ่าน; `AC_ENR_01.test.jsx` 2 tests ผ่านเมื่อ `VITE_ENROLLMENT_MOCK=false` (F-07) | ช่องโหว่ |
+| FR-ENR-03 | AC-ENR-02 | T-07, T-09, T-14, T-15 | `enrollment_validator.py: validate_enrollment_form`; `enrollment_submission_service.py: submit_application`; `EnrollmentForm` | `test_AC_ENR_02_required_values_are_validated_against_the_approved_form`, `test_submit_validation_failure_returns_errors_and_preserves_draft`, `AC_ENR_02.test.jsx` ผ่าน; ยังไม่มี Staff Review ยืนยันว่า Draft ไม่แสดง (F-01) | ช่องโหว่ |
+| FR-ENR-04 | AC-ENR-03 | T-08 | `enrollment_validator.py`; `EnrollmentForm` | `test_other_year_level_requires_and_accepts_a_detail`, `test_invalid_year_level_is_rejected` ผ่าน; ไม่มี UI test ยืนยันการแสดง/แจ้ง error ของ `year_level_other` (F-08) | ช่องโหว่ |
+| FR-ENR-05 | AC-ENR-03 | T-08, T-09, T-16, T-17 | `enrollment_validator.py`; `EnrollmentForm` | `test_AC_ENR_03_allergy_details_are_required_for_submit`, `test_AC_ENR_03_food_allergy_validation` ผ่าน; ตรวจเงื่อนไข, แสดง error, ล้างรายละเอียดเมื่อเลือก “ไม่มี” | ครบ |
+| FR-ENR-06 | AC-ENR-04 | T-09, T-11 | `camp_enrollment.py: submit_application`; `enrollment_submission_service.py: submit_application`; `CampEnrollmentPage` | `test_AC_ENR_04_submit_success_sets_review_status` และ `test_AC_ENR_04_submit_ui` ผ่านโดยใช้ fake connection/mock client; ยังไม่มี PostgreSQL integration (F-03) | ช่องโหว่ |
+| FR-ENR-07 | AC-ENR-04, AC-ENR-05 | T-09 ถึง T-13 | `submit_application`, `get_application`; `ApplicantApplicationPage`; Staff Review API ยังไม่มี (T-10 Deferred) | tests AC-ENR-04/05 ฝั่ง backend ใช้ fake connection และ UI tests ผ่านด้วย mock; ไม่มี test/API Staff Review (F-01, F-03) | ช่องโหว่ |
+| NFR-USE-01 | AC-ENR-02, AC-ENR-03 | T-07, T-15, T-17 | `EnrollmentForm`; `CampEnrollmentPage` | `AC_ENR_02.test.jsx`, `AC_ENR_03.test.jsx` ผ่านสำหรับ required fields และ allergy; ไม่มี UI test ของข้อผิดพลาด `year_level_other` (F-08) | ช่องโหว่ |
+| NFR-DATA-01 | AC-ENR-05 | T-01, T-05, T-12, T-13 | Draft/Application models; `save_draft`, `get_draft`, `get_application`; `ApplicantApplicationPage` | `test_AC_ENR_05_saved_application_status_is_visible`, `test_AC_ENR_05_application_view` ผ่านด้วย fake DB/mock; ยังไม่ยืนยัน persistence กับ PostgreSQL จริง (F-03) | ช่องโหว่ |
+| NFR-SEC-01 | AC-ENR-01, AC-ENR-05 | T-02, T-05, T-06, T-10, T-12, T-13 | `get_current_user_id`; Login API และ Session; owner-scoped Draft/Application APIs | Session/Login และ owner isolation tests ผ่าน; Staff Review ที่มี role access ยังไม่ทำเพราะ T-10 Deferred | ยังไม่ถึง |
+| NFR-REL-01 | AC-ENR-02, AC-ENR-03, AC-ENR-04 | T-07 ถึง T-10, T-14 ถึง T-17 | `submit_application` ปฏิเสธ validation ที่ไม่ผ่าน; Staff Review API ยังไม่มี | tests ยืนยัน error และคง Draft/ไม่สร้าง Application ด้วย fake connection; ไม่มี test ยืนยัน Staff Review ไม่แสดง Draft และไม่มี PostgreSQL integration (F-01, F-03) | ช่องโหว่ |
+| CON-ENR-01 | AC-ENR-01, AC-ENR-04 | T-04, T-09 | `get_configured_camp_id`; `read_configured_camp`; `submit_application` | `test_configured_camp_api_AC_ENR_01`, tests กรณีไม่มี config/record และค่ายปิด ผ่าน | ครบ |
+| CON-ENR-02 | AC-ENR-01 | T-02, T-05, T-06, T-12 | `bind_session_user`, `get_current_user_id`; Draft/Application APIs | `test_enrollment_session_guard`, `test_draft_owner_save_load_AC_ENR_01`, `test_AC_LOG_01_login_success_by_role` และ Login tests รวม 9 passed | ครบ |
+| CON-ENR-03 | AC-ENR-02 | T-07, T-09, T-14 | `validate_enrollment_form`; `submit_application`; `save_draft` | tests required fields/validation failure ผ่าน; Draft partial ยังอยู่และไม่สร้าง Application เมื่อ validation ไม่ผ่าน | ครบ |
+| CON-ENR-04 | AC-ENR-03, AC-ENR-04 | T-08, T-09, T-16, T-17 | `validate_enrollment_form`; `EnrollmentForm`; Submit API | backend tests ครอบคลุม year level/allergy; allergy UI test ผ่าน; ไม่มี UI test ของ `year_level_other` (F-08) | ช่องโหว่ |
+| IF-ENR-01 | AC-ENR-02, AC-ENR-04 | T-07, T-09, T-14 | `validate_enrollment_form`; `submit_application` | tests ยืนยัน Submit ตรวจ required fields ก่อนสร้าง Application และคง Draft เมื่อไม่ผ่าน | ครบ |
+| IF-ENR-02 | AC-ENR-03, AC-ENR-04 | T-08, T-09, T-16 | `validate_enrollment_form`; `EnrollmentForm`; `submit_application` | backend tests ตรวจ year level/allergy; AC-ENR-03 UI test ตรวจ allergy; ไม่มี flow เอกสารแนบ | ครบ |
+
+### 11.2 ตามรอยย้อนกลับ (โค้ด ไป requirement)
+| โค้ด (ไฟล์: ฟังก์ชัน หรือ endpoint) | อ้าง ID | ตรงกับข้อความใน spec ไหม | หมายเหตุ |
+|---|---|---|---|
+| `backend/app/config.py: get_configured_camp_id` | CON-ENR-01 | ตรง | อ่าน `CAMP_ID` ฝั่ง Server และไม่มี fallback |
+| `backend/app/api/camp_enrollment.py: GET /enrollment/camp`; `camp_enrollment_service.py: get_configured_camp` | FR-ENR-01, CON-ENR-01 | ตรง | คืนข้อมูลจาก record ที่ตั้งค่าไว้ |
+| `backend/app/api/camp_enrollment.py: PUT/GET /applications/draft`; `enrollment_draft_service.py: save_draft, get_draft` | FR-ENR-02, CON-ENR-02, CON-ENR-03, NFR-SEC-01, ASM-09 | ตรง | ใช้ CAMP_ID จาก Server และ applicant จาก Session; บันทึก partial Draft โดยไม่ใช้ submission validation |
+| `backend/app/api/camp_enrollment.py: POST /applications/submit`; `enrollment_submission_service.py: submit_application` | FR-ENR-03, FR-ENR-04, FR-ENR-05, FR-ENR-06, FR-ENR-07, CON-ENR-01, CON-ENR-03, CON-ENR-04, IF-ENR-01, IF-ENR-02, NFR-REL-01 | ตรงบางส่วน | เช็คค่ายเปิด, validate ฟิลด์/เงื่อนไข และสร้าง `submitted`; ใช้ fake connection จึงยังไม่ยืนยัน PostgreSQL จริง (F-03); Staff Review ยังไม่มี (F-01) |
+| `backend/app/api/camp_enrollment.py: GET /applications/{application_id}`; `enrollment_submission_service.py: get_application` | FR-ENR-07, NFR-DATA-01, NFR-SEC-01, AC-ENR-05 | ตรง | จำกัดข้อมูลตาม application ID, owner จาก Session และ CAMP_ID จาก Server; tests ใช้ fake connection |
+| `GET /applications/review` (ยังไม่มี endpoint; T-10 Deferred) | FR-ENR-03, FR-ENR-07, NFR-SEC-01, NFR-REL-01 | ยังตรวจไม่ได้ | ไม่มีรายการ Staff Review และไม่มี test ยืนยันว่าแสดงเฉพาะใบสมัคร `submitted` (F-01); งานรอข้อจำกัด Authentication/Role ตาม tasks.md |
+| `backend/app/validators/enrollment_validator.py: validate_enrollment_form, validate_form_field_names` | FR-ENR-03, FR-ENR-04, FR-ENR-05, CON-ENR-03, CON-ENR-04, IF-ENR-01, IF-ENR-02 | ตรงตามเงื่อนไข | ตรวจ Required Fields, `year_level` และเงื่อนไขแพ้อาหาร; ไม่ตรวจหรือรับเอกสารแนบ |
+| `backend/app/models/application.py`, `application_draft.py`, `camp.py`; `backend/db/schema.sql` | FR-ENR-02, FR-ENR-06, FR-ENR-07, NFR-DATA-01, NFR-REL-01, ASM-05, ASM-08, ASM-09 | ตรงตามขอบเขต | รองรับ Draft/Application และคง schema เอกสารเดิมเป็น legacy; active flow ไม่ใช้เอกสาร |
+| `backend/app/api/authentication.py: POST /login`; `authentication_service.py: authenticate_user`; `middleware/auth.py: bind_session_user, get_current_user_id` | CON-ENR-02, NFR-SEC-01 | ตรง | Login ตรวจ account/password แล้วผูก identity ที่ยืนยันแล้วเข้ากับ signed Session; Login route tests ผ่าน 9 รายการ (ยืนยันการปิด F-05) |
+| `frontend/src/App.jsx: EnrollmentFlow, App` | FR-ENR-01, FR-ENR-02, FR-ENR-06, FR-ENR-07, ASM-08 | ตรงบางส่วน | ใช้ API client หรือเลือก mock ตาม `VITE_ENROLLMENT_MOCK`; ค่าใน `.env.local` ทำให้เลือก mock และไม่ใช้ client ที่ test ส่งให้ (F-07) |
+| `frontend/src/api/mockEnrollmentClient.js: mockEnrollmentClient` | FR-ENR-02, FR-ENR-03, FR-ENR-06, FR-ENR-07, ASM-08 | ตรงบางส่วน | บันทึก Draft/Application ใน `localStorage`; `submitApplication` ไม่ validate ข้อมูล จึงเป็น mock behavior เท่านั้น ไม่ใช่หลักฐานการทำงานของ Backend |
+| `frontend/src/pages/CampEnrollmentPage.jsx: CampEnrollmentPage, handleSubmitApplication`; `EnrollmentForm`; `EnrollmentPreview` | FR-ENR-01 ถึง FR-ENR-06, CON-ENR-02 ถึง CON-ENR-04, NFR-USE-01 | ตรงบางส่วน | ฟอร์มและเงื่อนไข allergy ตรง; มี UI สำหรับ `year_level_other` แต่ไม่มี UI test ยืนยันทุก Then ของ AC-ENR-03 (F-08) |
+| `frontend/src/pages/ApplicantApplicationPage.jsx: ApplicantApplicationPage` | FR-ENR-07, NFR-DATA-01, NFR-SEC-01, AC-ENR-05 | ตรง | เรียกดูใบสมัครและสถานะผ่าน client; test ใช้ mock client |
+| `frontend/src/api/client.js: createApiClient` | FR-ENR-01, FR-ENR-02, FR-ENR-03, FR-ENR-06, FR-ENR-07, CON-ENR-02 | ตรง | เรียก API พร้อม credentials; ไม่รับ `camp_id` จากผู้สมัคร |
+| `frontend/src/api/demoClient.js: createDemoApiClient`; `App.jsx: DemoApp` | ASM-08 | ตรง | Demo ใช้ข้อมูลจำลองเฉพาะเมื่อเปิด `VITE_DEMO_MODE` ใน Development และไม่เรียก Backend |
+
+### 11.3 ข้อค้นพบปัจจุบัน
+ชนิด: AC ไม่มี test / test อ่อน / โค้ดไม่มี FR / FR ไม่มี AC / เดา Q-xx / ละเมิด Constraint / ตัวเลขไม่ตรง spec / อ้าง ID ผิดเรื่อง
+
+| F-ID | ชนิด | อยู่ที่ | ขัดกับ | รายละเอียด | ทีมตัดสิน |
+|---|---|---|---|---|---|
+| F-01 | test อ่อน | AC-ENR-02/04 / Staff Review | FR-ENR-03, FR-ENR-07, NFR-REL-01 | ยังไม่มี `GET /applications/review` และ test ยืนยันว่า Draft ไม่แสดงในรายการเจ้าหน้าที่; T-10 ยัง Deferred | คงข้อค้นพบไว้ รอตรวจสอบใน T-10; Draft ต้องไม่ปรากฏใน Staff Review |
+| F-03 | test อ่อน | TC-ENR-04-3 / `backend/tests/test_AC_ENR_04.py` | AC-ENR-04, AC-ENR-05, FR-ENR-06, FR-ENR-07, NFR-DATA-01 | Tests ของการ submit/อ่านข้อมูลใช้ fake connection และจำลองผล SQL/transaction เอง; ยังไม่มีการตรวจการทำงานกับ PostgreSQL จริงตามที่ TC-ENR-04-3 ระบุ จึงยังยืนยันการทำงานของ SQL, schema และ transaction ในฐานข้อมูลจริงไม่ได้ | คงสถานะเปิดไว้เพื่อรอ Integration Test กับ PostgreSQL จริง; ห้ามระบุว่าผ่านแล้ว |
+| F-07 | test อ่อน | `frontend/.env.local`; `frontend/src/App.jsx: App` | AC-ENR-01, FR-ENR-01, FR-ENR-02 | ค่า `VITE_ENROLLMENT_MOCK=true` ทำให้ `App` เลือก `mockEnrollmentClient` แทน client ที่ tests ส่งเข้าไป; การรัน frontend suite ตามปกติมี test เกี่ยวกับ Camp Enrollment ล้มเหลว 6 รายการ แต่ 8 tests ใน 3 ไฟล์ผ่านเมื่อกำหนด `VITE_ENROLLMENT_MOCK=false`; test suite จึงไม่แยก API-client path จาก mock mode โดยค่าเริ่มต้น | คงข้อค้นพบไว้ ต้องปรับการตั้งค่าให้ทดสอบ API-client path ได้อย่างถูกต้อง และรัน Frontend Test Suite ซ้ำ|
+| F-08 | test อ่อน | AC-ENR-03 / `frontend/src/components/EnrollmentForm.jsx`; `frontend/src/__tests__/AC_ENR_03.test.jsx` | FR-ENR-04, NFR-USE-01, CON-ENR-04 | มี backend tests ตรวจ `year_level=other` และรายละเอียด แต่ไม่มี UI test ยืนยันว่าเลือก “อื่นๆ (ระบุ)” แล้วแสดงช่องรายละเอียด และแจ้ง error เมื่อว่างตาม Then ของ AC-ENR-03 |คงข้อค้นพบไว้ ต้องเพิ่ม UI Test ให้ครอบคลุมการแสดงช่องรายละเอียดและการแจ้ง Error ก่อนพิจารณาปิด Finding|
+
+### 11.4 แก้แล้ว
+| F-ID | แก้อย่างไร | รู้ได้อย่างไร |
+|---|---|---|
+| F-05 | พบ Login API/service ที่ตรวจ credentials จากฐานข้อมูลและเรียก `bind_session_user` หลังยืนยันบัญชี; Session guard อ่าน identity จาก signed Session | `test_AC_LOG_01_login_success_by_role`, tests AC-LOG-02/03 และ `test_login_authentication_service.py` ผ่านรวม 9 tests; ยืนยันเส้นทาง Login ผูกบัญชีกับ Session ได้ ไม่ได้อาศัย test ที่สร้าง cookie เองเพียงอย่างเดียว |
+
+หมายเหตุ: F-04 มีมติทีมอนุมัติข้อความ “กำลังส่งใบสมัคร…” ตามข้อค้นพบเดิม จึงไม่เปิดซ้ำ; F-02 และ F-06 อยู่ในรายการแก้แล้วก่อนหน้านี้.
 
 
