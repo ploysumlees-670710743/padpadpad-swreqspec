@@ -49,9 +49,9 @@
 
 | F-ID | ชนิด | อยู่ที่ | ขัดกับ | รายละเอียด | ทีมตัดสิน |
 |---|---|---|---|---|---|
-| F-16 | โค้ดไม่มี FR | `backend/app/api/applicants.py:GET /applicants/search`, `frontend/src/pages/ApplicantSearchPage.jsx` | FR-REG-01, plan.md ข้อ 4, tasks.md T-03/T-04 | เพิ่ม API และหน้าค้นหาด้วย ID/ชื่อแล้ว แต่รายการ API และ task เดิมยังไม่ระบุ surface นี้ จึง trace กลับไปยังแผนงานไม่ได้ครบ | |
-| F-17 | test อ่อน | `backend/tests/test_AC_REG_01.py:test_AC_REG_01_save_edit_and_create_audit_log` | DOM-AUD-01, retention 3 เดือน | test ตรวจเพียงว่า `retention_until` มี timezone ไม่ได้ตรวจว่าเป็นวันเวลาหลัง `edited_at` ครบ 3 เดือนตาม policy ที่ทีมกำหนด | |
-| F-18 | ละเมิด Constraint | `backend/app/services/applicant_service.py:ApplicantService.initialize`, `backend/db/schema.sql` | DOM-AUD-01 | `CREATE TABLE IF NOT EXISTS` ไม่เพิ่มคอลัมน์ `retention_until` ให้ฐานข้อมูลเดิมที่สร้างก่อน schema เปลี่ยน ทำให้ deployment เดิมอาจ insert Audit Log ไม่ได้ | |
+| F-16 | โค้ดไม่มี FR | `backend/app/api/applicants.py:GET /applicants/search`, `frontend/src/pages/ApplicantSearchPage.jsx` | FR-REG-01, plan.md ข้อ 4, tasks.md T-03/T-04 | เพิ่ม API และหน้าค้นหาด้วย ID/ชื่อแล้ว แต่รายการ API และ task เดิมยังไม่ระบุ surface นี้ จึง trace กลับไปยังแผนงานไม่ได้ครบ | แก้ spec — ปรับ plan.md และ tasks.md ให้ครอบคลุม API และหน้าค้นหาที่เพิ่มขึ้น พร้อมระบุความเชื่อมโยงกับ FR-REG-01 |
+| F-17 | test อ่อน | `backend/tests/test_AC_REG_01.py:test_AC_REG_01_save_edit_and_create_audit_log` | DOM-AUD-01, retention 3 เดือน | test ตรวจเพียงว่า `retention_until` มี timezone ไม่ได้ตรวจว่าเป็นวันเวลาหลัง `edited_at` ครบ 3 เดือนตาม policy ที่ทีมกำหนด | แก้โค้ด — เพิ่ม Test ตรวจสอบว่า retention_until ตรงกับระยะเวลาเก็บรักษา 3 เดือนตาม policy |
+| F-18 | ละเมิด Constraint | `backend/app/services/applicant_service.py:ApplicantService.initialize`, `backend/db/schema.sql` | DOM-AUD-01 | `CREATE TABLE IF NOT EXISTS` ไม่เพิ่มคอลัมน์ `retention_until` ให้ฐานข้อมูลเดิมที่สร้างก่อน schema เปลี่ยน ทำให้ deployment เดิมอาจ insert Audit Log ไม่ได้ |แก้โค้ด — เพิ่ม Database Migration สำหรับฐานข้อมูลเดิม เพื่อให้มีคอลัมน์ retention_until โดยไม่กระทบข้อมูลที่มีอยู่ |
 
 ## 4. แก้แล้ว
 

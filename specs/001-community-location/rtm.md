@@ -42,15 +42,15 @@
 
 | F-ID | ชนิด | อยู่ที่ | ขัดกับ | รายละเอียด | ทีมตัดสิน |
 |---|---|---|---|---|---|
-| F-UC01-01 | Integration pending | API Auth | C-01 | ยังไม่มี middleware UC-09 เติม trusted `request.state.user_id/role`; หากไม่มี dependency override API ปฏิเสธคำขอ | |
-| F-UC01-02 | Dependency pending | assignment DB | C-01 | ต้อง provision user/location โดยทีมอย่างปลอดภัย; service ไม่มี flow สร้าง assignment และ test ใส่ข้อมูลเอง | |
-| F-UC01-03 | Performance | QR-01 | QR-01 | ยังไม่ยืนยันการตอบสนองภายใน 2 วินาทีของระบบจริง | |
-| F-UC01-04 | Open Questions | spec.md | Q-01-01, Q-01-02 | เบอร์โทร/ชื่อซ้ำ/ไฟล์แนบยังไม่มีคำตอบ; ไม่พบโค้ดเดา regex, duplicate rule หรือ upload | |
-| F-UC01-05 | FR ไม่มี AC | spec.md, `CommunityFields`, `CommunityLocationPage` | FR-01-03, FR-01-04, C-02 | AC-01 ไม่ระบุ local_rules หรือตำแหน่งผู้ดูแล; โค้ดและ plan ทำตำแหน่ง optional และ test ไม่ assert ตำแหน่ง | |
-| F-UC01-06 | test อ่อน | `uc01_uc07_ui.test.jsx`, `CommunityLocationPage.jsx` | FR-01-01, FR-01-05, QR-02 | มี component test ตรวจข้อความยืนยันแล้ว แต่ render ด้วย in-memory demo และเลือก location ที่ preselect; ไม่ทดสอบ route/API จริง, การเลือก location จาก assignment หรือ usability | |
-| F-UC01-08 | โค้ดไม่มี FR | `backend/app/main.py: app` | FR-01-01..05, AF-01-01, C-01 | ประกาศ FastAPI app ชุดที่สองทับชุดแรกที่ mount `communities_router`; OpenAPI ของ `backend.app.main:app` ไม่มี UC-01 routes และ `backend.main:app` ก็ไม่มีเช่นกัน | |
-| F-UC01-09 | ตัวเลขไม่ตรง spec | `backend/app/services/community_location_service.py: CommunityService.connect` | QR-01 | SQLite connection ตั้ง `timeout=5` วินาที ขณะที่ QR-01 กำหนดตอบสนองภายใน 2 วินาที; เมื่อรอ database lock request อาจเกินเกณฑ์ | |
-| F-UC01-10 | โค้ดไม่มี FR | `frontend/src/main.jsx: RouteRoot`; `CommunityLocationPage.jsx` | FR-01-01 | เปิดหน้าได้เฉพาะผ่าน query `?feature=community-location`; ไม่พบเมนูหรือลิงก์ที่คณะกรรมการใช้เปิดการจัดการข้อมูลชุมชน | |
+| F-UC01-01 | Integration pending | API Auth | C-01 | ยังไม่มี middleware UC-09 เติม trusted `request.state.user_id/role`; หากไม่มี dependency override API ปฏิเสธคำขอ |  แก้โค้ด — เชื่อมต่อ Middleware จาก UC-09 เพื่อรับ trusted user_id/role และทดสอบการปฏิเสธคำขอที่ไม่มีสิทธิ์ |
+| F-UC01-02 | Dependency pending | assignment DB | C-01 | ต้อง provision user/location โดยทีมอย่างปลอดภัย; service ไม่มี flow สร้าง assignment และ test ใส่ข้อมูลเอง | แก้โค้ด — เพิ่มกระบวนการ provision user/location และสร้าง assignment อย่างปลอดภัย โดยต้องประสานทีมที่รับผิดชอบฐานข้อมูล|
+| F-UC01-03 | Performance | QR-01 | QR-01 | ยังไม่ยืนยันการตอบสนองภายใน 2 วินาทีของระบบจริง |แก้โค้ด — ตรวจสอบและปรับประสิทธิภาพระบบให้ตอบสนองภายใน 2 วินาทีตาม QR-01 พร้อมทดสอบกับระบบจริง |
+| F-UC01-04 | Open Questions | spec.md | Q-01-01, Q-01-02 | เบอร์โทร/ชื่อซ้ำ/ไฟล์แนบยังไม่มีคำตอบ; ไม่พบโค้ดเดา regex, duplicate rule หรือ upload | เพิ่ม Q-xx — คงประเด็นเบอร์โทร ชื่อซ้ำ และไฟล์แนบไว้เป็นคำถามรอทีมตัดสินใจก่อนพัฒนา|
+| F-UC01-05 | FR ไม่มี AC | spec.md, `CommunityFields`, `CommunityLocationPage` | FR-01-03, FR-01-04, C-02 | AC-01 ไม่ระบุ local_rules หรือตำแหน่งผู้ดูแล; โค้ดและ plan ทำตำแหน่ง optional และ test ไม่ assert ตำแหน่ง |แก้ spec — ปรับ AC ให้ระบุ local_rules และตำแหน่งผู้ดูแลให้สอดคล้องกับ FR-01-03 และ FR-01-04 |
+| F-UC01-06 | test อ่อน | `uc01_uc07_ui.test.jsx`, `CommunityLocationPage.jsx` | FR-01-01, FR-01-05, QR-02 | มี component test ตรวจข้อความยืนยันแล้ว แต่ render ด้วย in-memory demo และเลือก location ที่ preselect; ไม่ทดสอบ route/API จริง, การเลือก location จาก assignment หรือ usability | แก้โค้ด — เพิ่มการทดสอบ Route/API จริง การเลือก Location จาก Assignment และ Usability ให้ครอบคลุม QR-02 |
+| F-UC01-08 | โค้ดไม่มี FR | `backend/app/main.py: app` | FR-01-01..05, AF-01-01, C-01 | ประกาศ FastAPI app ชุดที่สองทับชุดแรกที่ mount `communities_router`; OpenAPI ของ `backend.app.main:app` ไม่มี UC-01 routes และ `backend.main:app` ก็ไม่มีเช่นกัน |แก้โค้ด — แก้การประกาศ FastAPI app ที่ซ้ำกัน ให้ UC-01 routes ถูก mount ใน Application Entry Point ที่ใช้งานจริง |
+| F-UC01-09 | ตัวเลขไม่ตรง spec | `backend/app/services/community_location_service.py: CommunityService.connect` | QR-01 | SQLite connection ตั้ง `timeout=5` วินาที ขณะที่ QR-01 กำหนดตอบสนองภายใน 2 วินาที; เมื่อรอ database lock request อาจเกินเกณฑ์ | แก้โค้ด — ปรับการจัดการ Database Lock/Timeout ให้สอดคล้องกับ QR-01 และทดสอบกรณีฐานข้อมูลมี Lock |
+| F-UC01-10 | โค้ดไม่มี FR | `frontend/src/main.jsx: RouteRoot`; `CommunityLocationPage.jsx` | FR-01-01 | เปิดหน้าได้เฉพาะผ่าน query `?feature=community-location`; ไม่พบเมนูหรือลิงก์ที่คณะกรรมการใช้เปิดการจัดการข้อมูลชุมชน | แก้ spec — ตรวจสอบว่า FR-01-01 ครอบคลุมช่องทางเข้าถึงหน้าจอจากระบบหลักหรือไม่ หากครอบคลุมแล้วให้แก้โค้ดเพิ่มเมนูหรือลิงก์ให้ตรง Requirement |
 
 ## 4. แก้แล้ว
 
